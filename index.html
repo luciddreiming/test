@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Complaint & Request System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <h1>Barangay Portal Login</h1>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <span class="toggle-password" id="togglePasswordLogin">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
+                        </svg>
+                    </span>
+                </div>
+                <p class="caps-warning" id="capsWarningLogin" style="display: none;">⚠️ Caps Lock is on</p>
+                <button type="submit">Login</button>
+                <p class="form-footer">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div class="login-container" id="signupPage" style="display: none;">
+        <div class="login-box">
+            <h1>Create Account</h1>
+            <form id="signupForm">
+                <input type="text" id="signupName" placeholder="Full Name" required>
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <input type="text" id="signupUsername" placeholder="Username" required>
+                <div class="password-container">
+                    <input type="password" id="signupPassword" placeholder="Password" required>
+                    <span class="toggle-password" id="togglePasswordSignup">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
+                        </svg>
+                    </span>
+                </div>
+                <p class="caps-warning" id="capsWarningSignup" style="display: none;">⚠️Caps Lock is on</p>
+                <div class="password-container">
+                    <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required>
+                    <span class="toggle-password" id="toggleConfirmPassword">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Account Type</label>
+                    <select id="userRole" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="resident">Resident</option>
+                        <option value="staff">Barangay Staff</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit">Sign Up</button>
+                <p class="form-footer">Already have an account? <a href="#" id="showLogin">Log in</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="main-content" id="dashboardPage" style="display: none;">
+        <header>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+            <h1>Barangay Complaint & Request System</h1>
+            <div id="userRoleDisplay"></div>
+        </header>
+
+        <div class="dashboard-container">
+            <!-- Resident Complaint Form -->
+            <div class="complaint-form" id="complaintFormSection">
+                <h2>Submit a Complaint/Request</h2>
+                <form id="complaintForm">
+                    <div class="form-group">
+                        <label for="complaintType">Type of Issue</label>
+                        <select id="complaintType" required>
+                            <option value="" disabled selected>Select issue type</option>
+                            <option value="Streetlight Repair">Streetlight Repair</option>
+                            <option value="Garbage Collection">Garbage Collection</option>
+                            <option value="Road Repair">Road Repair</option>
+                            <option value="Flooding">Flooding</option>
+                            <option value="Noise Complaint">Noise Complaint</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="complaintDetails">Details</label>
+                        <textarea id="complaintDetails" rows="4" required placeholder="Please describe your issue in detail"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="complaintLocation">Location</label>
+                        <input type="text" id="complaintLocation" required placeholder="Where is the issue located?">
+                    </div>
+                    <div class="form-group">
+                        <label for="photoUpload">Upload Photo (Optional)</label>
+                        <input type="file" id="photoUpload" accept="image/*">
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Complaint</button>
+                </form>
+            </div>
+
+            <!-- Resident Tracking Dashboard -->
+            <div class="tracking-dashboard">
+                <h2>My Complaints/Requests</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="statusFilter">Filter by Status:</label>
+                        <select id="statusFilter">
+                            <option value="all">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="complaintsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaintsList">
+                            <!-- Complaints will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Staff/Admin Management Dashboard -->
+            <div class="staff-dashboard" id="staffDashboard" style="display: none;">
+                <h2 id="managementTitle">All Complaints/Requests</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="manageStatusFilter">Status:</label>
+                        <select id="manageStatusFilter">
+                            <option value="all">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchComplaints">Search:</label>
+                        <input type="text" id="searchComplaints" placeholder="Search complaints...">
+                    </div>
+                    <button id="generateReportBtn" class="filter-btn">Generate Report</button>
+                </div>
+                <div class="table-container">
+                    <table id="manageComplaintsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Resident</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageComplaintsList">
+                            <!-- Complaints for staff/admin will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin Report Submission Form -->
+            <div class="complaint-form" id="adminReportFormSection" style="display: none;">
+                <h2>Submit Report for Staff Processing</h2>
+                <form id="adminReportForm">
+                    <div class="form-group">
+                        <label for="adminReportType">Type of Issue</label>
+                        <select id="adminReportType" required>
+                            <option value="" disabled selected>Select issue type</option>
+                            <option value="Streetlight Repair">Streetlight Repair</option>
+                            <option value="Garbage Collection">Garbage Collection</option>
+                            <option value="Road Repair">Road Repair</option>
+                            <option value="Flooding">Flooding</option>
+                            <option value="Noise Complaint">Noise Complaint</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminReportDetails">Details</label>
+                        <textarea id="adminReportDetails" rows="4" required placeholder="Describe the issue in detail"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminReportLocation">Location</label>
+                        <input type="text" id="adminReportLocation" required placeholder="Where is the issue located?">
+                    </div>
+                    <div class="form-group">
+                        <label for="adminReportFeedback">Feedback/Solution</label>
+                        <textarea id="adminReportFeedback" rows="4" required placeholder="Provide your feedback or suggested solution"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPhotoUpload">Upload Photo (Optional)</label>
+                        <input type="file" id="adminPhotoUpload" accept="image/*">
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Report</button>
+                </form>
+            </div>
+
+            <!-- Public View of Resolved Complaints -->
+            <div class="public-view">
+                <h2>Recently Resolved Issues</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="publicTypeFilter">Filter by Type:</label>
+                        <select id="publicTypeFilter">
+                            <option value="all">All Types</option>
+                            <option value="Streetlight Repair">Streetlight Repair</option>
+                            <option value="Garbage Collection">Garbage Collection</option>
+                            <option value="Road Repair">Road Repair</option>
+                            <option value="Flooding">Flooding</option>
+                            <option value="Noise Complaint">Noise Complaint</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="resolved-complaints-grid" id="resolvedComplaintsGrid">
+                    <!-- Resolved complaints will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaint Details Modal -->
+    <div class="modal" id="complaintDetailsModal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+            <h2 id="modalComplaintTitle">Complaint Details</h2>
+            <div class="modal-body" id="modalComplaintBody">
+                <!-- Complaint details will be populated here -->
+            </div>
+            <div class="modal-actions" id="modalActions">
+                <!-- Action buttons will be added here based on user role -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
