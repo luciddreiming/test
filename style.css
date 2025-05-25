@@ -382,6 +382,11 @@ tr:hover {
     color: white;
 }
 
+.print-btn {
+    background-color: var(--barangay-green);
+    color: white;
+}
+
 .resolved-complaints-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -500,6 +505,21 @@ tr:hover {
 .admin-feedback h3 {
     color: var(--barangay-blue);
     margin-bottom: 10px;
+}
+
+.complaint-detail {
+    margin-bottom: 20px;
+}
+
+.complaint-meta div {
+    margin-bottom: 10px;
+}
+
+.complaint-photo img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 15px;
+    border-radius: 4px;
 }
 
 /* Role-specific styles */
