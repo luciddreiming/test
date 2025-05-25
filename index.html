@@ -82,6 +82,26 @@
                 <h2>Submit a Complaint/Request</h2>
                 <form id="complaintForm">
                     <div class="form-group">
+                        <label for="residentName">Name</label>
+                        <input type="text" id="residentName" required placeholder="Your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="residentAge">Age</label>
+                        <input type="number" id="residentAge" required placeholder="Your age">
+                    </div>
+                    <div class="form-group">
+                        <label for="residentAddress">Address</label>
+                        <input type="text" id="residentAddress" required placeholder="Your complete address">
+                    </div>
+                    <div class="form-group">
+                        <label for="residentEmail">Email Address</label>
+                        <input type="email" id="residentEmail" required placeholder="Your email address">
+                    </div>
+                    <div class="form-group">
+                        <label for="residentContact">Contact Number</label>
+                        <input type="text" id="residentContact" required placeholder="Your contact number">
+                    </div>
+                    <div class="form-group">
                         <label for="complaintType">Type of Issue</label>
                         <select id="complaintType" required>
                             <option value="" disabled selected>Select issue type</option>
@@ -181,39 +201,22 @@
                 </div>
             </div>
 
-            <!-- Admin Report Submission Form -->
+            <!-- Admin Feedback Form -->
             <div class="complaint-form" id="adminReportFormSection" style="display: none;">
-                <h2>Submit Report for Staff Processing</h2>
+                <h2>Provide Feedback/Solution</h2>
                 <form id="adminReportForm">
                     <div class="form-group">
-                        <label for="adminReportType">Type of Issue</label>
-                        <select id="adminReportType" required>
-                            <option value="" disabled selected>Select issue type</option>
-                            <option value="Streetlight Repair">Streetlight Repair</option>
-                            <option value="Garbage Collection">Garbage Collection</option>
-                            <option value="Road Repair">Road Repair</option>
-                            <option value="Flooding">Flooding</option>
-                            <option value="Noise Complaint">Noise Complaint</option>
-                            <option value="Other">Other</option>
+                        <label for="adminComplaintSelect">Select Complaint</label>
+                        <select id="adminComplaintSelect" required>
+                            <option value="" disabled selected>Select a complaint to respond to</option>
+                            <!-- Will be populated by JavaScript -->
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="adminReportDetails">Details</label>
-                        <textarea id="adminReportDetails" rows="4" required placeholder="Describe the issue in detail"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="adminReportLocation">Location</label>
-                        <input type="text" id="adminReportLocation" required placeholder="Where is the issue located?">
-                    </div>
-                    <div class="form-group">
                         <label for="adminReportFeedback">Feedback/Solution</label>
-                        <textarea id="adminReportFeedback" rows="4" required placeholder="Provide your feedback or suggested solution"></textarea>
+                        <textarea id="adminReportFeedback" rows="4" required placeholder="Provide your feedback or solution"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="adminPhotoUpload">Upload Photo (Optional)</label>
-                        <input type="file" id="adminPhotoUpload" accept="image/*">
-                    </div>
-                    <button type="submit" class="submit-btn">Submit Report</button>
+                    <button type="submit" class="submit-btn">Submit Feedback</button>
                 </form>
             </div>
 
