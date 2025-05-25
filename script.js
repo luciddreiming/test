@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const publicTypeFilter = document.getElementById('publicTypeFilter');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const managementTitle = document.getElementById('managementTitle');
+    const adminComplaintSelect = document.getElementById('adminComplaintSelect');
 
     // Data
     let userAccounts = JSON.parse(localStorage.getItem('userAccounts')) || [
@@ -57,6 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             id: 1,
             residentName: 'Juan Dela Cruz',
+            residentAge: '35',
+            residentAddress: '123 Main St, Purok 5',
+            residentEmail: 'juan@example.com',
+            residentContact: '09123456789',
             residentUsername: 'resident',
             type: 'Garbage Collection',
             details: 'Garbage has not been collected for 3 days in our area',
@@ -71,6 +76,10 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             id: 2,
             residentName: 'Maria Santos',
+            residentAge: '28',
+            residentAddress: '456 Oak St, Purok 3',
+            residentEmail: 'maria@example.com',
+            residentContact: '09234567890',
             residentUsername: 'resident',
             type: 'Road Repair',
             details: 'Large pothole causing traffic and accidents',
@@ -85,6 +94,10 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             id: 3,
             residentName: 'Pedro Reyes',
+            residentAge: '42',
+            residentAddress: '789 Pine St, Purok 4',
+            residentEmail: 'pedro@example.com',
+            residentContact: '09345678901',
             residentUsername: 'resident',
             type: 'Streetlight Repair',
             details: 'Streetlight not working for 1 week',
@@ -229,6 +242,11 @@ document.addEventListener('DOMContentLoaded', function() {
         updateComplaintsTable();
         updateManageComplaintsTable();
         updateResolvedComplaintsGrid();
+        
+        // Populate admin complaint dropdown if admin
+        if (user.role === 'admin') {
+            populateAdminComplaintDropdown();
+        }
     }
 
     function updateUIForUserRole(role) {
@@ -348,19 +366,28 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        const name = document.getElementById('residentName').value.trim();
+        const age = document.getElementById('residentAge').value.trim();
+        const address = document.getElementById('residentAddress').value.trim();
+        const email = document.getElementById('residentEmail').value.trim();
+        const contact = document.getElementById('residentContact').value.trim();
         const type = document.getElementById('complaintType').value;
         const details = document.getElementById('complaintDetails').value.trim();
         const location = document.getElementById('complaintLocation').value.trim();
         const photoFile = document.getElementById('photoUpload').files[0];
         
-        if (!type || !details || !location) {
+        if (!name || !age || !address || !email || !contact || !type || !details || !location) {
             alert('Please fill in all required fields');
             return;
         }
         
         const newComplaint = {
             id: complaints.length > 0 ? Math.max(...complaints.map(c => c.id)) + 1 : 1,
-            residentName: currentUser.name,
+            residentName: name,
+            residentAge: age,
+            residentAddress: address,
+            residentEmail: email,
+            residentContact: contact,
             residentUsername: currentUser.username,
             type: type,
             details: details,
@@ -389,46 +416,46 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
         if (!currentUser || currentUser.role !== 'admin') {
-            alert('Only admin can submit reports');
+            alert('Only admin can submit feedback');
             return;
         }
         
-        const type = document.getElementById('adminReportType').value;
-        const details = document.getElementById('adminReportDetails').value.trim();
-        const location = document.getElementById('adminReportLocation').value.trim();
+        const complaintId = parseInt(document.getElementById('adminComplaintSelect').value);
         const feedback = document.getElementById('adminReportFeedback').value.trim();
-        const photoFile = document.getElementById('adminPhotoUpload').files[0];
         
-        if (!type || !details || !location || !feedback) {
-            alert('Please fill in all required fields');
+        if (!complaintId || !feedback) {
+            alert('Please select a complaint and provide feedback');
             return;
         }
         
-        const newComplaint = {
-            id: complaints.length > 0 ? Math.max(...complaints.map(c => c.id)) + 1 : 1,
-            residentName: 'Barangay Administration',
-            residentUsername: 'admin',
-            type: type,
-            details: details,
-            location: location,
-            date: new Date().toISOString().split('T')[0],
-            status: 'Pending',
-            photo: photoFile ? URL.createObjectURL(photoFile) : null,
-            assignedStaff: '',
-            resolutionNotes: feedback,
-            createdBy: currentUser.username,
-            isAdminReport: true
-        };
+        const complaint = complaints.find(c => c.id === complaintId);
+        if (complaint) {
+            complaint.resolutionNotes = feedback;
+            complaint.status = 'Resolved';
+            complaint.assignedStaff = 'Admin';
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            updateComplaintsTable();
+            updateManageComplaintsTable();
+            updateResolvedComplaintsGrid();
+            
+            alert('Feedback submitted successfully!');
+            adminReportForm.reset();
+            populateAdminComplaintDropdown();
+        }
+    }
+
+    function populateAdminComplaintDropdown() {
+        adminComplaintSelect.innerHTML = '<option value="" disabled selected>Select a complaint to respond to</option>';
         
-        complaints.push(newComplaint);
-        localStorage.setItem('complaints', JSON.stringify(complaints));
+        const pendingComplaints = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress');
         
-        updateComplaintsTable();
-        updateManageComplaintsTable();
-        updateResolvedComplaintsGrid();
-        
-        alert('Report submitted successfully for staff processing!');
-        adminReportForm.reset();
+        pendingComplaints.forEach(complaint => {
+            const option = document.createElement('option');
+            option.value = complaint.id;
+            option.textContent = `ID: ${complaint.id} - ${complaint.type} (${complaint.residentName})`;
+            adminComplaintSelect.appendChild(option);
+        });
     }
 
     function updateComplaintsTable() {
@@ -613,9 +640,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         modalTitle.textContent = `${complaint.type} (ID: ${complaint.id})`;
         
-        // Check if this is an admin report to show the feedback differently
-        const isAdminReport = complaint.isAdminReport || false;
-        
         modalBody.innerHTML = `
             <div class="complaint-detail">
                 <h3>Complaint Details</h3>
@@ -635,15 +659,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <strong>Status:</strong> <span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span>
                 </div>
                 ${complaint.assignedStaff ? `<div><strong>Assigned Staff:</strong> ${complaint.assignedStaff}</div>` : ''}
-                ${isAdminReport ? `
+                ${complaint.resolutionNotes ? `
                 <div class="admin-feedback">
                     <h3>Admin Feedback/Solution</h3>
                     <p>${complaint.resolutionNotes}</p>
-                </div>
-                ` : ''}
-                ${!isAdminReport && complaint.resolutionNotes ? `
-                <div class="resolution-notes">
-                    <strong>Resolution Notes:</strong> ${complaint.resolutionNotes}
                 </div>
                 ` : ''}
             </div>
@@ -657,6 +676,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
         
         if (currentUser) {
+            // Add print button for staff when there's admin feedback
+            if (currentUser.role === 'staff' && complaint.resolutionNotes) {
+                modalActions.innerHTML += `
+                    <button class="action-btn print-btn" id="printFeedbackBtn" data-id="${complaint.id}">Print Feedback</button>
+                `;
+                
+                document.getElementById('printFeedbackBtn').addEventListener('click', function() {
+                    printFeedback(complaint);
+                });
+            }
+            
             if (currentUser.role === 'staff' || currentUser.role === 'admin') {
                 if (complaint.status === 'Pending') {
                     modalActions.innerHTML += `
@@ -669,13 +699,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                 }
                 
-                // Only admin can delete complaints
-                if (currentUser.role === 'admin') {
-                    modalActions.innerHTML += `
-                        <button class="action-btn delete-btn" id="deleteBtn" data-id="${complaint.id}">Delete</button>
-                    `;
-                }
-                
                 document.getElementById('assignToMeBtn')?.addEventListener('click', function() {
                     assignComplaintToMe(complaintId);
                 });
@@ -685,16 +708,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 document.getElementById('resolveBtn')?.addEventListener('click', function() {
-                    // Skip resolution notes prompt for admin reports since they already have feedback
-                    if (isAdminReport) {
-                        updateComplaintStatus(complaintId, 'Resolved');
-                    } else {
-                        const resolutionNotes = prompt('Enter resolution notes:');
-                        if (resolutionNotes !== null) {
-                            updateComplaintStatus(complaintId, 'Resolved', resolutionNotes);
-                        }
+                    const resolutionNotes = prompt('Enter resolution notes:');
+                    if (resolutionNotes !== null) {
+                        updateComplaintStatus(complaintId, 'Resolved', resolutionNotes);
                     }
                 });
+            }
+            
+            // Only admin can delete complaints
+            if (currentUser.role === 'admin') {
+                modalActions.innerHTML += `
+                    <button class="action-btn delete-btn" id="deleteBtn" data-id="${complaint.id}">Delete</button>
+                `;
                 
                 document.getElementById('deleteBtn')?.addEventListener('click', function() {
                     deleteComplaint(complaintId);
@@ -703,6 +728,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         modal.style.display = 'block';
+    }
+
+    function printFeedback(complaint) {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Feedback for Complaint #${complaint.id}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1 { color: #166088; }
+                    .complaint-info { margin-bottom: 20px; }
+                    .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #166088; }
+                </style>
+            </head>
+            <body>
+                <h1>Feedback for Complaint #${complaint.id}</h1>
+                <div class="complaint-info">
+                    <p><strong>Type:</strong> ${complaint.type}</p>
+                    <p><strong>Submitted by:</strong> ${complaint.residentName}</p>
+                    <p><strong>Date:</strong> ${complaint.date}</p>
+                    <p><strong>Location:</strong> ${complaint.location}</p>
+                </div>
+                <div class="feedback">
+                    <h3>Admin Feedback/Solution</h3>
+                    <p>${complaint.resolutionNotes}</p>
+                </div>
+                <script>
+                    setTimeout(function() {
+                        window.print();
+                        window.close();
+                    }, 500);
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     }
 
     function closeModal() {
@@ -733,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (complaint) {
             complaint.status = status;
-            if (resolutionNotes && !complaint.isAdminReport) {
+            if (resolutionNotes) {
                 complaint.resolutionNotes = resolutionNotes;
             }
             localStorage.setItem('complaints', JSON.stringify(complaints));
