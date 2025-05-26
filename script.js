@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
     const loginPage = document.getElementById('loginPage');
     const signupPage = document.getElementById('signupPage');
     const dashboardPage = document.getElementById('dashboardPage');
@@ -28,10 +27,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModalBtn = document.getElementById('closeModalBtn');
     const managementTitle = document.getElementById('managementTitle');
     const adminComplaintSelect = document.getElementById('adminComplaintSelect');
+    const complaintsList = document.getElementById('complaintsList');
+    const manageComplaintsList = document.getElementById('manageComplaintsList');
+    const resolvedComplaintsGrid = document.getElementById('resolvedComplaintsGrid');
+    const userRoleDisplay = document.getElementById('userRoleDisplay');
+    const staffDashboard = document.getElementById('staffDashboard');
+    const trackingDashboard = document.querySelector('.tracking-dashboard');
+    const modal = document.getElementById('complaintDetailsModal');
+    const modalTitle = document.getElementById('modalComplaintTitle');
+    const modalBody = document.getElementById('modalComplaintBody');
+    const modalActions = document.getElementById('modalActions');
 
-    // Data
     let userAccounts = JSON.parse(localStorage.getItem('userAccounts')) || [
         { 
+            id: '1',
             username: 'admin', 
             password: 'admin123', 
             name: 'Administrator', 
@@ -39,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             role: 'admin'
         },
         { 
+            id: '2',
             username: 'staff', 
             password: 'staff123', 
             name: 'Barangay Staff', 
@@ -46,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             role: 'staff'
         },
         { 
+            id: '3',
             username: 'resident', 
             password: 'resident123', 
             name: 'Resident User', 
@@ -63,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
             residentEmail: 'juan@example.com',
             residentContact: '09123456789',
             residentUsername: 'resident',
+            residentId: '3',
             type: 'Garbage Collection',
             details: 'Garbage has not been collected for 3 days in our area',
             location: 'Purok 5, near basketball court',
@@ -71,7 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
             photo: null,
             assignedStaff: 'Staff 1',
             resolutionNotes: 'Garbage was collected the following day',
-            createdBy: 'resident'
+            createdBy: 'resident',
+            createdById: '3'
         },
         {
             id: 2,
@@ -81,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             residentEmail: 'maria@example.com',
             residentContact: '09234567890',
             residentUsername: 'resident',
+            residentId: '3',
             type: 'Road Repair',
             details: 'Large pothole causing traffic and accidents',
             location: 'Main road near barangay hall',
@@ -89,7 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
             photo: null,
             assignedStaff: 'Staff 2',
             resolutionNotes: '',
-            createdBy: 'resident'
+            createdBy: 'resident',
+            createdById: '3'
         },
         {
             id: 3,
@@ -99,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             residentEmail: 'pedro@example.com',
             residentContact: '09345678901',
             residentUsername: 'resident',
+            residentId: '3',
             type: 'Streetlight Repair',
             details: 'Streetlight not working for 1 week',
             location: 'Corner of Purok 3 and Purok 4',
@@ -107,493 +123,397 @@ document.addEventListener('DOMContentLoaded', function() {
             photo: null,
             assignedStaff: '',
             resolutionNotes: '',
-            createdBy: 'resident'
+            createdBy: 'resident',
+            createdById: '3'
         }
     ];
 
-    // Initialize
     function init() {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-        if (currentUser) {
-            showDashboard(currentUser);
-        }
-        initEventListeners();
-    }
-
-    function initEventListeners() {
-        // Login/Signup
-        showSignup.addEventListener('click', function(e) {
-            e.preventDefault();
-            loginPage.style.display = 'none';
-            signupPage.style.display = 'flex';
-        });
-
-        showLogin.addEventListener('click', function(e) {
-            e.preventDefault();
-            signupPage.style.display = 'none';
-            loginPage.style.display = 'flex';
-        });
-
-        togglePasswordLogin.addEventListener('click', function() {
-            togglePasswordVisibility(passwordLogin, togglePasswordLogin);
-        });
-
-        togglePasswordSignup.addEventListener('click', function() {
-            togglePasswordVisibility(passwordSignup, togglePasswordSignup);
-        });
-
-        toggleConfirmPassword.addEventListener('click', function() {
-            togglePasswordVisibility(confirmPassword, toggleConfirmPassword);
-        });
-
-        passwordLogin.addEventListener('keyup', checkCapsLock);
-        passwordLogin.addEventListener('keydown', checkCapsLock);
-        passwordSignup.addEventListener('keyup', checkCapsLock);
-        passwordSignup.addEventListener('keydown', checkCapsLock);
-        confirmPassword.addEventListener('keyup', checkCapsLock);
-        confirmPassword.addEventListener('keydown', checkCapsLock);
-
-        loginForm.addEventListener('submit', handleLogin);
-        signupForm.addEventListener('submit', handleSignup);
-        logoutBtn.addEventListener('click', logout);
-
-        // Complaint system
-        complaintForm.addEventListener('submit', handleComplaintSubmit);
-        adminReportForm.addEventListener('submit', handleAdminReportSubmit);
-        statusFilter.addEventListener('change', updateComplaintsTable);
-        manageStatusFilter.addEventListener('change', updateManageComplaintsTable);
-        searchComplaints.addEventListener('input', updateManageComplaintsTable);
-        generateReportBtn.addEventListener('click', generateReport);
-        publicTypeFilter.addEventListener('change', updateResolvedComplaintsGrid);
-        closeModalBtn.addEventListener('click', closeModal);
-    }
-
-    // Helper functions
-    function togglePasswordVisibility(inputField, toggleButton) {
-        if (inputField.type === 'password') {
-            inputField.type = 'text';
-            toggleButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
-                    <path d="M22 2L2 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            `;
-        } else {
-            inputField.type = 'password';
-            toggleButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
-                </svg>
-            `;
-        }
-    }
-
-    function checkCapsLock(e) {
-        const isCapsLockOn = e.getModifierState && e.getModifierState('CapsLock');
-
-        if (e.target === passwordLogin) {
-            capsWarningLogin.style.display = isCapsLockOn ? 'block' : 'none';
-        } else if (e.target === passwordSignup || e.target === confirmPassword) {
-            capsWarningSignup.style.display = isCapsLockOn ? 'block' : 'none';
+        console.log("Initializing Barangay Complaint System...");
+        try {
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                showDashboard(currentUser);
+            } else {
+                showLoginPage();
+            }
+            setupEventListeners();
+            updateAllViews();
+        } catch (error) {
+            console.error("Initialization failed:", error);
+            alert("System initialization error. Please refresh.");
         }
     }
 
     function handleLogin(e) {
         e.preventDefault();
+        try {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
 
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
+            if (!username || !password) {
+                throw new Error('Username and password are required');
+            }
 
-        // Basic validation
-        if (!username || !password) {
-            alert('Please enter both username and password');
-            return;
-        }
-
-        const user = userAccounts.find(account => 
-            account.username === username && account.password === password
-        );
-
-        if (user) {
-            // Store user in sessionStorage
+            const user = authenticateUser(username, password);
             sessionStorage.setItem('currentUser', JSON.stringify(user));
             
             showDashboard(user);
-            
-            // Reset the form
             loginForm.reset();
-        } else {
-            alert('Invalid username or password');
-            // Clear password field for security
+            
+            console.log("Login successful:", username);
+        } catch (error) {
+            console.error("Login error:", error.message);
             document.getElementById('password').value = '';
+            alert(error.message);
+        }
+    }
+
+    function authenticateUser(username, password) {
+        const user = userAccounts.find(account => 
+            account.username === username && account.password === password
+        );
+        
+        if (!user) {
+            throw new Error('Invalid username or password');
+        }
+        return user;
+    }
+
+    function handleSignup(e) {
+        e.preventDefault();
+        try {
+            const formData = {
+                name: document.getElementById('signupName').value.trim(),
+                email: document.getElementById('signupEmail').value.trim(),
+                username: document.getElementById('signupUsername').value.trim(),
+                password: document.getElementById('signupPassword').value,
+                confirmPassword: document.getElementById('signupConfirmPassword').value,
+                role: document.getElementById('userRole').value
+            };
+
+            validateSignup(formData);
+            const newUser = createUserAccount(formData);
+            
+            userAccounts.push(newUser);
+            localStorage.setItem('userAccounts', JSON.stringify(userAccounts));
+            
+            showLoginPage();
+            signupForm.reset();
+            
+            console.log("Signup successful:", newUser.username);
+            alert('Account created successfully! Please login.');
+        } catch (error) {
+            console.error("Signup error:", error.message);
+            alert(error.message);
+        }
+    }
+
+    function validateSignup(formData) {
+        if (!formData.name || !formData.email || !formData.username || 
+            !formData.password || !formData.confirmPassword || !formData.role) {
+            throw new Error('Please fill in all fields');
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            throw new Error('Passwords do not match');
+        }
+
+        if (userAccounts.some(account => account.username.toLowerCase() === formData.username.toLowerCase())) {
+            throw new Error('Username already exists');
+        }
+
+        if (userAccounts.some(account => account.email.toLowerCase() === formData.email.toLowerCase())) {
+            throw new Error('Email already registered');
+        }
+
+        if (formData.password.length < 6) {
+            throw new Error('Password must be at least 6 characters long');
+        }
+    }
+
+    function createUserAccount(formData) {
+        return { 
+            id: Date.now().toString(),
+            username: formData.username, 
+            password: formData.password, 
+            name: formData.name, 
+            email: formData.email,
+            role: formData.role 
+        };
+    }
+
+    function logout() {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            console.log("Logging out user:", currentUser.username);
+        }
+        
+        sessionStorage.removeItem('currentUser');
+        showLoginPage();
+        resetAllForms();
+    }
+
+    function handleComplaintSubmit(e) {
+        e.preventDefault();
+        try {
+            const currentUser = getCurrentUser();
+            if (!currentUser || currentUser.role !== 'resident') {
+                throw new Error('Only residents can submit complaints');
+            }
+
+            const formData = collectComplaintFormData();
+            validateComplaintForm(formData);
+            
+            const newComplaint = createComplaint(formData, currentUser);
+            complaints.push(newComplaint);
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            updateAllViews();
+            complaintForm.reset();
+            
+            console.log("Complaint submitted:", newComplaint.id);
+            alert('Complaint submitted successfully!');
+        } catch (error) {
+            console.error("Complaint submission error:", error.message);
+            alert(error.message);
+        }
+    }
+
+    function collectComplaintFormData() {
+        return {
+            name: document.getElementById('residentName').value.trim(),
+            age: document.getElementById('residentAge').value.trim(),
+            address: document.getElementById('residentAddress').value.trim(),
+            email: document.getElementById('residentEmail').value.trim(),
+            contact: document.getElementById('residentContact').value.trim(),
+            type: document.getElementById('complaintType').value,
+            details: document.getElementById('complaintDetails').value.trim(),
+            location: document.getElementById('complaintLocation').value.trim(),
+            photoFile: document.getElementById('photoUpload').files[0]
+        };
+    }
+
+    function validateComplaintForm(formData) {
+        if (!formData.name || !formData.age || !formData.address || 
+            !formData.email || !formData.contact || !formData.type || 
+            !formData.details || !formData.location) {
+            throw new Error('Please fill in all required fields');
+        }
+    }
+
+    function createComplaint(formData, currentUser) {
+        return {
+            id: complaints.length > 0 ? Math.max(...complaints.map(c => c.id)) + 1 : 1,
+            residentName: formData.name,
+            residentAge: formData.age,
+            residentAddress: formData.address,
+            residentEmail: formData.email,
+            residentContact: formData.contact,
+            residentUsername: currentUser.username,
+            residentId: currentUser.id,
+            type: formData.type,
+            details: formData.details,
+            location: formData.location,
+            date: new Date().toISOString().split('T')[0],
+            status: 'Pending',
+            photo: formData.photoFile ? URL.createObjectURL(formData.photoFile) : null,
+            assignedStaff: '',
+            resolutionNotes: '',
+            createdBy: currentUser.username,
+            createdById: currentUser.id
+        };
+    }
+
+    function handleAdminReportSubmit(e) {
+        e.preventDefault();
+        try {
+            const currentUser = getCurrentUser();
+            if (!currentUser || currentUser.role !== 'admin') {
+                throw new Error('Only admin can submit reports');
+            }
+
+            const complaintId = parseInt(adminComplaintSelect.value);
+            const feedback = document.getElementById('adminReportFeedback').value.trim();
+
+            if (!complaintId || !feedback) {
+                throw new Error('Please select a complaint and provide feedback');
+            }
+
+            updateComplaintResolution(complaintId, feedback, currentUser.name);
+            updateAllViews();
+            adminReportForm.reset();
+            populateAdminComplaintDropdown();
+            
+            console.log("Admin report submitted for complaint:", complaintId);
+            alert('Feedback submitted successfully!');
+        } catch (error) {
+            console.error("Admin report error:", error.message);
+            alert(error.message);
+        }
+    }
+
+    function updateComplaintResolution(complaintId, feedback, staffName) {
+        const complaint = complaints.find(c => c.id === complaintId);
+        if (complaint) {
+            complaint.resolutionNotes = feedback;
+            complaint.status = 'Resolved';
+            complaint.assignedStaff = staffName;
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+        } else {
+            throw new Error('Complaint not found');
         }
     }
 
     function showDashboard(user) {
-        // Hide login/signup, show dashboard
         loginPage.style.display = 'none';
         signupPage.style.display = 'none';
         dashboardPage.style.display = 'block';
-        
-        // Update UI based on user role
         updateUIForUserRole(user.role);
-        
-        // Initialize complaint tables and grid
-        updateComplaintsTable();
-        updateManageComplaintsTable();
-        updateResolvedComplaintsGrid();
-        
-        // Populate admin complaint dropdown if admin
-        if (user.role === 'admin') {
-            populateAdminComplaintDropdown();
-        }
+    }
+
+    function showLoginPage() {
+        loginPage.style.display = 'flex';
+        signupPage.style.display = 'none';
+        dashboardPage.style.display = 'none';
     }
 
     function updateUIForUserRole(role) {
-        const userRoleDisplay = document.getElementById('userRoleDisplay');
-        const staffDashboard = document.getElementById('staffDashboard');
-        const complaintFormSection = document.getElementById('complaintFormSection');
-        const adminReportFormSection = document.getElementById('adminReportFormSection');
-        const generateReportBtn = document.getElementById('generateReportBtn');
-        
         userRoleDisplay.textContent = role.charAt(0).toUpperCase() + role.slice(1);
         
-        // Update management title for admin
-        if (role === 'admin') {
-            managementTitle.textContent = 'All Complaints/Requests';
-        }
+        staffDashboard.style.display = 'none';
+        complaintFormSection.style.display = 'none';
+        adminReportFormSection.style.display = 'none';
+        trackingDashboard.style.display = 'none';
+        generateReportBtn.style.display = 'none';
         
-        // Show/hide sections based on role
         if (role === 'resident') {
-            staffDashboard.style.display = 'none';
             complaintFormSection.style.display = 'block';
-            adminReportFormSection.style.display = 'none';
-            generateReportBtn.style.display = 'none';
-        } 
-        else if (role === 'staff') {
+            trackingDashboard.style.display = 'block';
+        } else if (role === 'staff') {
             staffDashboard.style.display = 'block';
-            complaintFormSection.style.display = 'none';
-            adminReportFormSection.style.display = 'none';
-            generateReportBtn.style.display = 'none';
-        } 
-        else if (role === 'admin') {
+        } else if (role === 'admin') {
             staffDashboard.style.display = 'block';
-            complaintFormSection.style.display = 'none';
             adminReportFormSection.style.display = 'block';
             generateReportBtn.style.display = 'block';
         }
     }
 
-    function handleSignup(e) {
-        e.preventDefault();
-    
-        const name = document.getElementById('signupName').value.trim();
-        const email = document.getElementById('signupEmail').value.trim();
-        const username = document.getElementById('signupUsername').value.trim();
-        const password = document.getElementById('signupPassword').value;
-        const confirmPasswordValue = document.getElementById('signupConfirmPassword').value;
-        const role = document.getElementById('userRole').value;
-    
-        // Validation
-        if (!name || !email || !username || !password || !confirmPasswordValue || !role) {
-            alert('Please fill in all fields');
-            return;
-        }
-    
-        if (password !== confirmPasswordValue) {
-            alert('Passwords do not match');
-            return;
-        }
-    
-        if (userAccounts.some(account => account.username === username)) {
-            alert('Username already exists');
-            return;
-        }
-    
-        if (userAccounts.some(account => account.email === email)) {
-            alert('Email already registered');
-            return;
-        }
-    
-        // Validate password strength (optional)
-        if (password.length < 6) {
-            alert('Password must be at least 6 characters long');
-            return;
-        }
-    
-        const newUser = { 
-            username, 
-            password, 
-            name, 
-            email,
-            role 
-        };
-    
-        userAccounts.push(newUser);
-        localStorage.setItem('userAccounts', JSON.stringify(userAccounts));
-    
-        signupPage.style.display = 'none';
-        loginPage.style.display = 'flex';
-        signupForm.reset();
-        alert('Account created successfully! Please login.');
-    }
-
-    function logout() {
-        sessionStorage.removeItem('currentUser');
-        loginPage.style.display = 'flex';
-        signupPage.style.display = 'none';
-        dashboardPage.style.display = 'none';
-        
-        loginForm.reset();
-        signupForm.reset();
-        complaintForm.reset();
-        adminReportForm.reset();
-    }
-
-    // Complaint system functions
-    function handleComplaintSubmit(e) {
-        e.preventDefault();
-        
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-        if (!currentUser) {
-            alert('Please login to submit a complaint');
-            return;
-        }
-        
-        // Only residents can submit complaints
-        if (currentUser.role !== 'resident') {
-            alert('Only residents can submit complaints');
-            return;
-        }
-        
-        const name = document.getElementById('residentName').value.trim();
-        const age = document.getElementById('residentAge').value.trim();
-        const address = document.getElementById('residentAddress').value.trim();
-        const email = document.getElementById('residentEmail').value.trim();
-        const contact = document.getElementById('residentContact').value.trim();
-        const type = document.getElementById('complaintType').value;
-        const details = document.getElementById('complaintDetails').value.trim();
-        const location = document.getElementById('complaintLocation').value.trim();
-        const photoFile = document.getElementById('photoUpload').files[0];
-        
-        if (!name || !age || !address || !email || !contact || !type || !details || !location) {
-            alert('Please fill in all required fields');
-            return;
-        }
-        
-        const newComplaint = {
-            id: complaints.length > 0 ? Math.max(...complaints.map(c => c.id)) + 1 : 1,
-            residentName: name,
-            residentAge: age,
-            residentAddress: address,
-            residentEmail: email,
-            residentContact: contact,
-            residentUsername: currentUser.username,
-            type: type,
-            details: details,
-            location: location,
-            date: new Date().toISOString().split('T')[0],
-            status: 'Pending',
-            photo: photoFile ? URL.createObjectURL(photoFile) : null,
-            assignedStaff: '',
-            resolutionNotes: '',
-            createdBy: currentUser.username
-        };
-        
-        complaints.push(newComplaint);
-        localStorage.setItem('complaints', JSON.stringify(complaints));
-        
+    function updateAllViews() {
         updateComplaintsTable();
         updateManageComplaintsTable();
         updateResolvedComplaintsGrid();
-        
-        alert('Your complaint/request has been submitted successfully!');
-        complaintForm.reset();
-    }
-
-    function handleAdminReportSubmit(e) {
-        e.preventDefault();
-        
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-        if (!currentUser || currentUser.role !== 'admin') {
-            alert('Only admin can submit feedback');
-            return;
-        }
-        
-        const complaintId = parseInt(document.getElementById('adminComplaintSelect').value);
-        const feedback = document.getElementById('adminReportFeedback').value.trim();
-        
-        if (!complaintId || !feedback) {
-            alert('Please select a complaint and provide feedback');
-            return;
-        }
-        
-        const complaint = complaints.find(c => c.id === complaintId);
-        if (complaint) {
-            complaint.resolutionNotes = feedback;
-            complaint.status = 'Resolved';
-            complaint.assignedStaff = 'Admin';
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateComplaintsTable();
-            updateManageComplaintsTable();
-            updateResolvedComplaintsGrid();
-            
-            alert('Feedback submitted successfully!');
-            adminReportForm.reset();
-            populateAdminComplaintDropdown();
-        }
-    }
-
-    function populateAdminComplaintDropdown() {
-        adminComplaintSelect.innerHTML = '<option value="" disabled selected>Select a complaint to respond to</option>';
-        
-        const pendingComplaints = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress');
-        
-        pendingComplaints.forEach(complaint => {
-            const option = document.createElement('option');
-            option.value = complaint.id;
-            option.textContent = `ID: ${complaint.id} - ${complaint.type} (${complaint.residentName})`;
-            adminComplaintSelect.appendChild(option);
-        });
+        populateAdminComplaintDropdown();
     }
 
     function updateComplaintsTable() {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+        const currentUser = getCurrentUser();
         if (!currentUser) return;
-        
+
         const statusFilterValue = statusFilter.value;
-        const complaintsList = document.getElementById('complaintsList');
-        complaintsList.innerHTML = '';
-        
-        let filteredComplaints = complaints.filter(complaint => 
-            complaint.residentUsername === currentUser.username
+        let filteredComplaints = complaints.filter(c => 
+            c.createdById === currentUser.id && 
+            c.createdBy === currentUser.username
         );
-        
+
         if (statusFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(complaint => 
-                complaint.status === statusFilterValue
-            );
+            filteredComplaints = filteredComplaints.filter(c => c.status === statusFilterValue);
         }
-        
-        if (filteredComplaints.length === 0) {
-            complaintsList.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center;">No complaints found</td>
-                </tr>
-            `;
-            return;
-        }
-        
-        filteredComplaints.forEach(complaint => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${complaint.id}</td>
-                <td>${complaint.type}</td>
-                <td>${complaint.date}</td>
-                <td><span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span></td>
-                <td>${complaint.location}</td>
-                <td>
-                    <button class="action-btn view-btn" data-id="${complaint.id}">View</button>
-                </td>
-            `;
-            complaintsList.appendChild(row);
-        });
-        
-        // Add event listeners to view buttons
-        document.querySelectorAll('.view-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const complaintId = parseInt(this.getAttribute('data-id'));
-                showComplaintDetails(complaintId);
-            });
-        });
+
+        renderTable(
+            complaintsList,
+            filteredComplaints,
+            ['id', 'type', 'date', 'status', 'location'],
+            ['ID', 'Type', 'Date', 'Status', 'Location'],
+            true
+        );
     }
 
     function updateManageComplaintsTable() {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'staff')) {
-            return;
-        }
-        
+        const currentUser = getCurrentUser();
+        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'staff')) return;
+
         const statusFilterValue = manageStatusFilter.value;
         const searchValue = searchComplaints.value.toLowerCase();
-        const manageComplaintsList = document.getElementById('manageComplaintsList');
-        manageComplaintsList.innerHTML = '';
         
         let filteredComplaints = [...complaints];
         
         if (statusFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(complaint => 
-                complaint.status === statusFilterValue
-            );
+            filteredComplaints = filteredComplaints.filter(c => c.status === statusFilterValue);
         }
         
         if (searchValue) {
-            filteredComplaints = filteredComplaints.filter(complaint => 
-                complaint.type.toLowerCase().includes(searchValue) ||
-                complaint.residentName.toLowerCase().includes(searchValue) ||
-                complaint.location.toLowerCase().includes(searchValue)
+            filteredComplaints = filteredComplaints.filter(c => 
+                c.type.toLowerCase().includes(searchValue) ||
+                c.residentName.toLowerCase().includes(searchValue) ||
+                c.location.toLowerCase().includes(searchValue)
             );
         }
-        
-        if (filteredComplaints.length === 0) {
-            manageComplaintsList.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center;">No complaints found</td>
-                </tr>
-            `;
+
+        renderTable(
+            manageComplaintsList,
+            filteredComplaints,
+            ['id', 'type', 'residentName', 'date', 'status', 'location'],
+            ['ID', 'Type', 'Resident', 'Date', 'Status', 'Location'],
+            currentUser.role === 'admin'
+        );
+    }
+
+    function renderTable(container, data, properties, headers, showActions) {
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+            container.innerHTML = `<tr><td colspan="${headers.length + 1}" style="text-align: center;">No complaints found</td></tr>`;
             return;
         }
-        
-        filteredComplaints.forEach(complaint => {
+
+        data.forEach(item => {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${complaint.id}</td>
-                <td>${complaint.type}</td>
-                <td>${complaint.residentName}</td>
-                <td>${complaint.date}</td>
-                <td><span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span></td>
-                <td>${complaint.location}</td>
-                <td>
-                    <button class="action-btn view-btn" data-id="${complaint.id}">View</button>
-                    ${currentUser.role === 'admin' ? `<button class="action-btn delete-btn" data-id="${complaint.id}">Delete</button>` : ''}
-                </td>
+            
+            properties.forEach(prop => {
+                const cell = document.createElement('td');
+                if (prop === 'status') {
+                    cell.innerHTML = `<span class="status-badge status-${item[prop].toLowerCase().replace(' ', '-')}">${item[prop]}</span>`;
+                } else {
+                    cell.textContent = item[prop];
+                }
+                row.appendChild(cell);
+            });
+
+            const actionCell = document.createElement('td');
+            actionCell.innerHTML = `
+                <button class="action-btn view-btn" data-id="${item.id}">View</button>
+                ${showActions ? `<button class="action-btn delete-btn" data-id="${item.id}">Delete</button>` : ''}
             `;
-            manageComplaintsList.appendChild(row);
+            row.appendChild(actionCell);
+
+            container.appendChild(row);
         });
-        
-        // Add event listeners to action buttons
-        document.querySelectorAll('.view-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const complaintId = parseInt(this.getAttribute('data-id'));
-                showComplaintDetails(complaintId);
-            });
+
+        container.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => showComplaintDetails(parseInt(btn.dataset.id)));
         });
-        
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const complaintId = parseInt(this.getAttribute('data-id'));
-                deleteComplaint(complaintId);
-            });
+
+        container.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteComplaint(parseInt(btn.dataset.id)));
         });
     }
 
     function updateResolvedComplaintsGrid() {
         const typeFilterValue = publicTypeFilter.value;
-        const resolvedComplaintsGrid = document.getElementById('resolvedComplaintsGrid');
-        resolvedComplaintsGrid.innerHTML = '';
-        
-        let filteredComplaints = complaints.filter(complaint => 
-            complaint.status === 'Resolved'
-        );
+        let filteredComplaints = complaints.filter(c => c.status === 'Resolved');
         
         if (typeFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(complaint => 
-                complaint.type === typeFilterValue
-            );
+            filteredComplaints = filteredComplaints.filter(c => c.type === typeFilterValue);
         }
-        
-        if (filteredComplaints.length === 0) {
+
+        renderComplaintCards(filteredComplaints);
+    }
+
+    function renderComplaintCards(complaints) {
+        resolvedComplaintsGrid.innerHTML = '';
+
+        if (complaints.length === 0) {
             resolvedComplaintsGrid.innerHTML = `
                 <div class="no-complaints">
                     <p>No resolved complaints to display</p>
@@ -601,8 +521,8 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             return;
         }
-        
-        filteredComplaints.forEach(complaint => {
+
+        complaints.forEach(complaint => {
             const card = document.createElement('div');
             card.className = 'complaint-card';
             card.innerHTML = `
@@ -619,25 +539,16 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             resolvedComplaintsGrid.appendChild(card);
         });
-        
-        // Add event listeners to view buttons
-        document.querySelectorAll('.view-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const complaintId = parseInt(this.getAttribute('data-id'));
-                showComplaintDetails(complaintId);
-            });
+
+        resolvedComplaintsGrid.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => showComplaintDetails(parseInt(btn.dataset.id)));
         });
     }
 
     function showComplaintDetails(complaintId) {
         const complaint = complaints.find(c => c.id === complaintId);
         if (!complaint) return;
-        
-        const modal = document.getElementById('complaintDetailsModal');
-        const modalTitle = document.getElementById('modalComplaintTitle');
-        const modalBody = document.getElementById('modalComplaintBody');
-        const modalActions = document.getElementById('modalActions');
-        
+
         modalTitle.textContent = `${complaint.type} (ID: ${complaint.id})`;
         
         modalBody.innerHTML = `
@@ -646,18 +557,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p>${complaint.details}</p>
             </div>
             <div class="complaint-meta">
-                <div>
-                    <strong>Submitted by:</strong> ${complaint.residentName}
-                </div>
-                <div>
-                    <strong>Date:</strong> ${complaint.date}
-                </div>
-                <div>
-                    <strong>Location:</strong> ${complaint.location}
-                </div>
-                <div>
-                    <strong>Status:</strong> <span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span>
-                </div>
+                <div><strong>Submitted by:</strong> ${complaint.residentName}</div>
+                <div><strong>Date:</strong> ${complaint.date}</div>
+                <div><strong>Location:</strong> ${complaint.location}</div>
+                <div><strong>Status:</strong> <span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span></div>
                 ${complaint.assignedStaff ? `<div><strong>Assigned Staff:</strong> ${complaint.assignedStaff}</div>` : ''}
                 ${complaint.resolutionNotes ? `
                 <div class="admin-feedback">
@@ -670,64 +573,106 @@ document.addEventListener('DOMContentLoaded', function() {
                 <img src="${complaint.photo}" alt="Complaint photo">
             </div>` : ''}
         `;
-        
-        // Update action buttons based on user role
+
+        updateModalActions(complaint);
+        modal.style.display = 'block';
+    }
+
+    function updateModalActions(complaint) {
         modalActions.innerHTML = '';
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+        const currentUser = getCurrentUser();
         
-        if (currentUser) {
-            // Add print button for staff when there's admin feedback
-            if (currentUser.role === 'staff' && complaint.resolutionNotes) {
+        if (!currentUser) return;
+
+        if (currentUser.role === 'staff' && complaint.resolutionNotes) {
+            modalActions.innerHTML += `
+                <button class="action-btn print-btn" id="printFeedbackBtn" data-id="${complaint.id}">Print Feedback</button>
+            `;
+            
+            document.getElementById('printFeedbackBtn').addEventListener('click', () => printFeedback(complaint));
+        }
+
+        if (currentUser.role === 'staff' || currentUser.role === 'admin') {
+            if (complaint.status === 'Pending') {
                 modalActions.innerHTML += `
-                    <button class="action-btn print-btn" id="printFeedbackBtn" data-id="${complaint.id}">Print Feedback</button>
+                    <button class="action-btn edit-btn" id="assignToMeBtn" data-id="${complaint.id}">Assign to Me</button>
+                    <button class="action-btn edit-btn" id="startProgressBtn" data-id="${complaint.id}">Start Progress</button>
                 `;
-                
-                document.getElementById('printFeedbackBtn').addEventListener('click', function() {
-                    printFeedback(complaint);
-                });
+            } else if (complaint.status === 'In Progress') {
+                modalActions.innerHTML += `
+                    <button class="action-btn edit-btn" id="resolveBtn" data-id="${complaint.id}">Mark as Resolved</button>
+                `;
             }
             
-            if (currentUser.role === 'staff' || currentUser.role === 'admin') {
-                if (complaint.status === 'Pending') {
-                    modalActions.innerHTML += `
-                        <button class="action-btn edit-btn" id="assignToMeBtn" data-id="${complaint.id}">Assign to Me</button>
-                        <button class="action-btn edit-btn" id="startProgressBtn" data-id="${complaint.id}">Start Progress</button>
-                    `;
-                } else if (complaint.status === 'In Progress') {
-                    modalActions.innerHTML += `
-                        <button class="action-btn edit-btn" id="resolveBtn" data-id="${complaint.id}">Mark as Resolved</button>
-                    `;
+            document.getElementById('assignToMeBtn')?.addEventListener('click', () => assignComplaintToMe(complaint.id));
+            document.getElementById('startProgressBtn')?.addEventListener('click', () => updateComplaintStatus(complaint.id, 'In Progress'));
+            document.getElementById('resolveBtn')?.addEventListener('click', () => {
+                const resolutionNotes = prompt('Enter resolution notes:');
+                if (resolutionNotes !== null) {
+                    updateComplaintStatus(complaint.id, 'Resolved', resolutionNotes);
                 }
-                
-                document.getElementById('assignToMeBtn')?.addEventListener('click', function() {
-                    assignComplaintToMe(complaintId);
-                });
-                
-                document.getElementById('startProgressBtn')?.addEventListener('click', function() {
-                    updateComplaintStatus(complaintId, 'In Progress');
-                });
-                
-                document.getElementById('resolveBtn')?.addEventListener('click', function() {
-                    const resolutionNotes = prompt('Enter resolution notes:');
-                    if (resolutionNotes !== null) {
-                        updateComplaintStatus(complaintId, 'Resolved', resolutionNotes);
-                    }
-                });
-            }
+            });
+        }
+
+        if (currentUser.role === 'admin') {
+            modalActions.innerHTML += `
+                <button class="action-btn delete-btn" id="deleteBtn" data-id="${complaint.id}">Delete</button>
+            `;
             
-            // Only admin can delete complaints
-            if (currentUser.role === 'admin') {
-                modalActions.innerHTML += `
-                    <button class="action-btn delete-btn" id="deleteBtn" data-id="${complaint.id}">Delete</button>
-                `;
-                
-                document.getElementById('deleteBtn')?.addEventListener('click', function() {
-                    deleteComplaint(complaintId);
-                });
+            document.getElementById('deleteBtn')?.addEventListener('click', () => deleteComplaint(complaint.id));
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    function assignComplaintToMe(complaintId) {
+        const currentUser = getCurrentUser();
+        const complaint = complaints.find(c => c.id === complaintId);
+        
+        if (complaint && currentUser) {
+            complaint.assignedStaff = currentUser.name;
+            complaint.status = 'In Progress';
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            updateAllViews();
+            closeModal();
+            alert('Complaint has been assigned to you and marked as In Progress');
+        }
+    }
+
+    function updateComplaintStatus(complaintId, status, resolutionNotes = '') {
+        const complaint = complaints.find(c => c.id === complaintId);
+        
+        if (complaint) {
+            complaint.status = status;
+            if (resolutionNotes) {
+                complaint.resolutionNotes = resolutionNotes;
             }
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            updateAllViews();
+            closeModal();
+            alert(`Complaint status updated to ${status}`);
+        }
+    }
+
+    function deleteComplaint(complaintId) {
+        const currentUser = getCurrentUser();
+        if (!currentUser || currentUser.role !== 'admin') {
+            alert('Only admin can delete complaints');
+            return;
         }
         
-        modal.style.display = 'block';
+        if (confirm('Are you sure you want to delete this complaint?')) {
+            complaints = complaints.filter(c => c.id !== complaintId);
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            updateAllViews();
+            closeModal();
+            alert('Complaint deleted successfully');
+        }
     }
 
     function printFeedback(complaint) {
@@ -768,69 +713,8 @@ document.addEventListener('DOMContentLoaded', function() {
         printWindow.document.close();
     }
 
-    function closeModal() {
-        const modal = document.getElementById('complaintDetailsModal');
-        modal.style.display = 'none';
-    }
-
-    function assignComplaintToMe(complaintId) {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-        const complaint = complaints.find(c => c.id === complaintId);
-        
-        if (complaint) {
-            complaint.assignedStaff = currentUser.name;
-            complaint.status = 'In Progress';
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateComplaintsTable();
-            updateManageComplaintsTable();
-            updateResolvedComplaintsGrid();
-            closeModal();
-            
-            alert('Complaint has been assigned to you and marked as In Progress');
-        }
-    }
-
-    function updateComplaintStatus(complaintId, status, resolutionNotes = '') {
-        const complaint = complaints.find(c => c.id === complaintId);
-        
-        if (complaint) {
-            complaint.status = status;
-            if (resolutionNotes) {
-                complaint.resolutionNotes = resolutionNotes;
-            }
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateComplaintsTable();
-            updateManageComplaintsTable();
-            updateResolvedComplaintsGrid();
-            closeModal();
-            
-            alert(`Complaint status updated to ${status}`);
-        }
-    }
-
-    function deleteComplaint(complaintId) {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-        if (!currentUser || currentUser.role !== 'admin') {
-            alert('Only admin can delete complaints');
-            return;
-        }
-        
-        if (confirm('Are you sure you want to delete this complaint?')) {
-            complaints = complaints.filter(c => c.id !== complaintId);
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateComplaintsTable();
-            updateManageComplaintsTable();
-            updateResolvedComplaintsGrid();
-            
-            alert('Complaint deleted successfully');
-        }
-    }
-
     function generateReport() {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+        const currentUser = getCurrentUser();
         if (!currentUser || currentUser.role !== 'admin') {
             alert('Only admin can generate reports');
             return;
@@ -843,20 +727,19 @@ document.addEventListener('DOMContentLoaded', function() {
         let filteredComplaints = [...complaints];
         
         if (statusFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(complaint => 
-                complaint.status === statusFilterValue
-            );
+            filteredComplaints = filteredComplaints.filter(c => c.status === statusFilterValue);
         }
         
         if (searchValue) {
-            filteredComplaints = filteredComplaints.filter(complaint => 
-                complaint.type.toLowerCase().includes(searchValue) ||
-                complaint.residentName.toLowerCase().includes(searchValue) ||
-                complaint.location.toLowerCase().includes(searchValue)
+            filteredComplaints = filteredComplaints.filter(c => 
+                c.type.toLowerCase().includes(searchValue) ||
+                c.residentName.toLowerCase().includes(searchValue) ||
+                c.location.toLowerCase().includes(searchValue)
             );
         }
         
-        const reportHtml = `
+        const reportWindow = window.open('', '_blank');
+        reportWindow.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
@@ -898,15 +781,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${filteredComplaints.map(complaint => `
+                        ${filteredComplaints.map(c => `
                             <tr>
-                                <td>${complaint.id}</td>
-                                <td>${complaint.type}</td>
-                                <td>${complaint.residentName}</td>
-                                <td>${complaint.date}</td>
-                                <td><span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span></td>
-                                <td>${complaint.location}</td>
-                                <td>${complaint.assignedStaff || 'Not assigned'}</td>
+                                <td>${c.id}</td>
+                                <td>${c.type}</td>
+                                <td>${c.residentName}</td>
+                                <td>${c.date}</td>
+                                <td><span class="status-badge status-${c.status.toLowerCase().replace(' ', '-')}">${c.status}</span></td>
+                                <td>${c.location}</td>
+                                <td>${c.assignedStaff || 'Not assigned'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -924,14 +807,85 @@ document.addEventListener('DOMContentLoaded', function() {
                 </script>
             </body>
             </html>
-        `;
-        
-        const reportWindow = window.open('', '_blank');
-        reportWindow.document.open();
-        reportWindow.document.write(reportHtml);
+        `);
         reportWindow.document.close();
     }
 
-    // Initialize the application
+    function getCurrentUser() {
+        return JSON.parse(sessionStorage.getItem('currentUser'));
+    }
+
+    function resetAllForms() {
+        [loginForm, signupForm, complaintForm, adminReportForm].forEach(form => form?.reset());
+    }
+
+    function populateAdminComplaintDropdown() {
+        adminComplaintSelect.innerHTML = '<option value="" disabled selected>Select a complaint to respond to</option>';
+        
+        const pendingComplaints = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress');
+        
+        pendingComplaints.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = `ID: ${c.id} - ${c.type} (${c.residentName})`;
+            adminComplaintSelect.appendChild(option);
+        });
+    }
+
+    function setupEventListeners() {
+        showSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginPage.style.display = 'none';
+            signupPage.style.display = 'flex';
+        });
+
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupPage.style.display = 'none';
+            loginPage.style.display = 'flex';
+        });
+
+        togglePasswordLogin.addEventListener('click', () => 
+            togglePasswordVisibility(passwordLogin, togglePasswordLogin));
+        
+        togglePasswordSignup.addEventListener('click', () => 
+            togglePasswordVisibility(passwordSignup, togglePasswordSignup));
+        
+        toggleConfirmPassword.addEventListener('click', () => 
+            togglePasswordVisibility(confirmPassword, toggleConfirmPassword));
+
+        loginForm.addEventListener('submit', handleLogin);
+        signupForm.addEventListener('submit', handleSignup);
+        complaintForm.addEventListener('submit', handleComplaintSubmit);
+        adminReportForm.addEventListener('submit', handleAdminReportSubmit);
+
+        logoutBtn.addEventListener('click', logout);
+        statusFilter.addEventListener('change', updateComplaintsTable);
+        manageStatusFilter.addEventListener('change', updateManageComplaintsTable);
+        searchComplaints.addEventListener('input', updateManageComplaintsTable);
+        generateReportBtn.addEventListener('click', generateReport);
+        publicTypeFilter.addEventListener('change', updateResolvedComplaintsGrid);
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+
+    function togglePasswordVisibility(inputField, toggleButton) {
+        if (inputField.type === 'password') {
+            inputField.type = 'text';
+            toggleButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
+                    <path d="M22 2L2 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            `;
+        } else {
+            inputField.type = 'password';
+            toggleButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
+                </svg>
+            `;
+        }
+    }
+
     init();
 });
