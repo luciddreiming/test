@@ -1,891 +1,817 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const loginPage = document.getElementById('loginPage');
-    const signupPage = document.getElementById('signupPage');
-    const dashboardPage = document.getElementById('dashboardPage');
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const showSignup = document.getElementById('showSignup');
-    const showLogin = document.getElementById('showLogin');
-    const togglePasswordLogin = document.getElementById('togglePasswordLogin');
-    const togglePasswordSignup = document.getElementById('togglePasswordSignup');
-    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-    const capsWarningLogin = document.getElementById('capsWarningLogin');
-    const capsWarningSignup = document.getElementById('capsWarningSignup');
-    const passwordLogin = document.getElementById('password');
-    const passwordSignup = document.getElementById('signupPassword');
-    const confirmPassword = document.getElementById('signupConfirmPassword');
-    const complaintForm = document.getElementById('complaintForm');
-    const adminReportForm = document.getElementById('adminReportForm');
-    const complaintFormSection = document.getElementById('complaintFormSection');
-    const adminReportFormSection = document.getElementById('adminReportFormSection');
-    const statusFilter = document.getElementById('statusFilter');
-    const manageStatusFilter = document.getElementById('manageStatusFilter');
-    const searchComplaints = document.getElementById('searchComplaints');
-    const generateReportBtn = document.getElementById('generateReportBtn');
-    const publicTypeFilter = document.getElementById('publicTypeFilter');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const managementTitle = document.getElementById('managementTitle');
-    const adminComplaintSelect = document.getElementById('adminComplaintSelect');
-    const complaintsList = document.getElementById('complaintsList');
-    const manageComplaintsList = document.getElementById('manageComplaintsList');
-    const resolvedComplaintsGrid = document.getElementById('resolvedComplaintsGrid');
-    const userRoleDisplay = document.getElementById('userRoleDisplay');
-    const staffDashboard = document.getElementById('staffDashboard');
-    const trackingDashboard = document.querySelector('.tracking-dashboard');
-    const modal = document.getElementById('complaintDetailsModal');
-    const modalTitle = document.getElementById('modalComplaintTitle');
-    const modalBody = document.getElementById('modalComplaintBody');
-    const modalActions = document.getElementById('modalActions');
+document.addEventListener("DOMContentLoaded", function () {
+  // DOM Elements
+  const containers = document.querySelectorAll(".container");
+  const showSignupLink = document.getElementById("show-signup");
+  const showLoginLink = document.getElementById("show-login");
+  const loginContainer = document.getElementById("login-container");
+  const signupContainer = document.getElementById("signup-container");
+  const roleSelectionContainer = document.getElementById("role-selection-container");
+  const residentContainer = document.getElementById("resident-container");
+  const staffContainer = document.getElementById("staff-container");
+  const adminContainer = document.getElementById("admin-container");
+  const staffDashboard = document.getElementById("staff-dashboard");
+  const adminDashboard = document.getElementById("admin-dashboard");
+  const requestFormContainer = document.getElementById("request-form-container");
+  const complaintFormContainer = document.getElementById("complaint-form-container");
+  const blotterFormContainer = document.getElementById("blotter-form-container");
+  const trackingContainer = document.getElementById("tracking-container");
+  const trackingBtn = document.querySelector('[data-service="tracking"]');
+  const mobileMenuBtn = document.getElementById("mobile-menu");
+  const mainNav = document.getElementById("main-nav");
 
-    let userAccounts = JSON.parse(localStorage.getItem('userAccounts')) || [
-        { 
-            id: '1',
-            username: 'admin', 
-            password: 'admin123', 
-            name: 'Administrator', 
-            email: 'admin@barangay.gov',
-            role: 'admin'
-        },
-        { 
-            id: '2',
-            username: 'staff', 
-            password: 'staff123', 
-            name: 'Barangay Staff', 
-            email: 'staff@barangay.gov',
-            role: 'staff'
-        },
-        { 
-            id: '3',
-            username: 'resident', 
-            password: 'resident123', 
-            name: 'Resident User', 
-            email: 'resident@barangay.gov',
-            role: 'resident'
-        }
-    ];
+  // Data storage
+  let selectedRole = null;
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let currentUser = null;
+  let requests = JSON.parse(localStorage.getItem("requests")) || [];
+  let complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+  let blotters = JSON.parse(localStorage.getItem("blotters")) || [];
 
-    let complaints = JSON.parse(localStorage.getItem('complaints')) || [
-        {
-            id: 1,
-            residentName: 'Juan Dela Cruz',
-            residentAge: '35',
-            residentAddress: '123 Main St, Purok 5',
-            residentEmail: 'juan@example.com',
-            residentContact: '09123456789',
-            residentUsername: 'resident',
-            residentId: '3',
-            type: 'Garbage Collection',
-            details: 'Garbage has not been collected for 3 days in our area',
-            location: 'Purok 5, near basketball court',
-            date: new Date().toISOString().split('T')[0],
-            status: 'Resolved',
-            photo: null,
-            assignedStaff: 'Staff 1',
-            resolutionNotes: 'Garbage was collected the following day',
-            createdBy: 'resident',
-            createdById: '3'
-        },
-        {
-            id: 2,
-            residentName: 'Maria Santos',
-            residentAge: '28',
-            residentAddress: '456 Oak St, Purok 3',
-            residentEmail: 'maria@example.com',
-            residentContact: '09234567890',
-            residentUsername: 'resident',
-            residentId: '3',
-            type: 'Road Repair',
-            details: 'Large pothole causing traffic and accidents',
-            location: 'Main road near barangay hall',
-            date: new Date().toISOString().split('T')[0],
-            status: 'In Progress',
-            photo: null,
-            assignedStaff: 'Staff 2',
-            resolutionNotes: '',
-            createdBy: 'resident',
-            createdById: '3'
-        },
-        {
-            id: 3,
-            residentName: 'Pedro Reyes',
-            residentAge: '42',
-            residentAddress: '789 Pine St, Purok 4',
-            residentEmail: 'pedro@example.com',
-            residentContact: '09345678901',
-            residentUsername: 'resident',
-            residentId: '3',
-            type: 'Streetlight Repair',
-            details: 'Streetlight not working for 1 week',
-            location: 'Corner of Purok 3 and Purok 4',
-            date: new Date().toISOString().split('T')[0],
-            status: 'Pending',
-            photo: null,
-            assignedStaff: '',
-            resolutionNotes: '',
-            createdBy: 'resident',
-            createdById: '3'
-        }
-    ];
+  // Utility function to hide all containers
+  function hideAllContainers() {
+    containers.forEach((container) => {
+      container.style.display = "none";
+    });
+  }
 
-    function init() {
-        console.log("Initializing Barangay Complaint System...");
-        try {
-            const currentUser = getCurrentUser();
-            if (currentUser) {
-                showDashboard(currentUser);
-            } else {
-                showLoginPage();
-            }
-            setupEventListeners();
-            updateAllViews();
-        } catch (error) {
-            console.error("Initialization failed:", error);
-            alert("System initialization error. Please refresh.");
-        }
+  // Initialize - show role selection first
+  hideAllContainers();
+  roleSelectionContainer.style.display = "flex";
+
+  // Mobile menu toggle
+  if (mobileMenuBtn && mainNav) {
+    mobileMenuBtn.addEventListener("click", function() {
+      mainNav.style.display = mainNav.style.display === "flex" ? "none" : "flex";
+    });
+    
+    // Adjust for window resize
+    window.addEventListener("resize", function() {
+      if (window.innerWidth > 768) {
+        mainNav.style.display = "flex";
+      } else {
+        mainNav.style.display = "none";
+      }
+    });
+  }
+
+  // Role selection handler
+  document.querySelectorAll(".role-card").forEach((card) => {
+    card.addEventListener("click", function () {
+      selectedRole = this.getAttribute("data-role");
+      hideAllContainers();
+
+      if (selectedRole === "staff" || selectedRole === "admin") {
+        loginContainer.style.display = "flex";
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+      } else {
+        loginContainer.style.display = "flex";
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+      }
+    });
+  });
+
+  // Toggle between login and signup forms
+  showSignupLink?.addEventListener("click", function (e) {
+    e.preventDefault();
+    loginContainer.style.display = "none";
+    signupContainer.style.display = "flex";
+  });
+
+  showLoginLink?.addEventListener("click", function (e) {
+    e.preventDefault();
+    signupContainer.style.display = "none";
+    loginContainer.style.display = "flex";
+  });
+
+  // Signup form submission
+  document.getElementById("signup-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("signup-email").value.trim();
+    const firstName = document.getElementById("first-name").value.trim();
+    const lastName = document.getElementById("last-name").value.trim();
+    const userType = document.getElementById("user-type").value;
+    const password = document.getElementById("signup-password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    // Validation
+    if (!email || !firstName || !lastName || !userType || !password || !confirmPassword) {
+      alert("Please fill in all fields");
+      return;
     }
 
-    function handleLogin(e) {
-        e.preventDefault();
-        try {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            if (!username || !password) {
-                throw new Error('Username and password are required');
-            }
-
-            const user = authenticateUser(username, password);
-            sessionStorage.setItem('currentUser', JSON.stringify(user));
-            
-            showDashboard(user);
-            loginForm.reset();
-            
-            console.log("Login successful:", username);
-        } catch (error) {
-            console.error("Login error:", error.message);
-            document.getElementById('password').value = '';
-            alert(error.message);
-        }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
     }
 
-    function authenticateUser(username, password) {
-        const user = userAccounts.find(account => 
-            account.username === username && account.password === password
-        );
+    if (users.some((user) => user.email === email)) {
+      alert("User with this email already exists!");
+      return;
+    }
+
+    // Create new user
+    const newUser = {
+      email,
+      firstName,
+      lastName,
+      userType,
+      password,
+      dateCreated: new Date().toISOString(),
+    };
+
+    users.push(newUser);
+    localStorage.setItem("users", JSON.stringify(users));
+
+    // Show role-specific instructions
+    if (userType === "staff") {
+      alert('Account created successfully! As staff, you will need to verify with "brgystff" after login.');
+    } else if (userType === "admin") {
+      alert('Account created successfully! As admin, you will need to verify with "admin" after login.');
+    } else {
+      alert("Account created successfully!");
+    }
+
+    // Clear form and show login
+    this.reset();
+    signupContainer.style.display = "none";
+    loginContainer.style.display = "flex";
+  });
+
+  // Login form submission
+  document.getElementById("login-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    // Find user
+    const user = users.find((u) => u.email === email);
+
+    // Validate credentials - only check against stored password
+    if (!user || user.password !== password) {
+      alert("Invalid email or password!");
+      return;
+    }
+
+    currentUser = user;
+    hideAllContainers();
+
+    // Redirect based on role
+    switch (user.userType) {
+      case "resident":
+        residentContainer.style.display = "block";
+        showResidentNotifications(user.email);
+        break;
+      case "staff":
+        staffContainer.style.display = "block";
+        break;
+      case "admin":
+        adminContainer.style.display = "block";
+        break;
+      default:
+        roleSelectionContainer.style.display = "block";
+    }
+  });
+
+  // Staff verification
+  document.getElementById("staff-auth-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const password = document.getElementById("staff-password").value;
+
+    // Verify current user is actually staff
+    if (!currentUser || currentUser.userType !== "staff") {
+      alert("Invalid user session!");
+      hideAllContainers();
+      roleSelectionContainer.style.display = "block";
+      return;
+    }
+
+    if (password === "brgystff") {
+      hideAllContainers();
+      staffDashboard.style.display = "block";
+      loadStaffDashboard();
+    } else {
+      alert("Invalid staff verification password!");
+    }
+  });
+
+  // Admin verification
+  document.getElementById("admin-auth-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const password = document.getElementById("admin-password").value;
+
+    // Verify current user is actually admin
+    if (!currentUser || currentUser.userType !== "admin") {
+      alert("Invalid user session!");
+      hideAllContainers();
+      roleSelectionContainer.style.display = "block";
+      return;
+    }
+
+    if (password === "admin") {
+      hideAllContainers();
+      adminDashboard.style.display = "block";
+      loadAdminDashboard();
+    } else {
+      alert("Invalid admin verification password!");
+    }
+  });
+
+  // Service card click handlers
+  document.querySelectorAll(".service-card").forEach((card) => {
+    card.addEventListener("click", function () {
+      const serviceType = this.getAttribute("data-service");
+      hideAllContainers();
+
+      switch (serviceType) {
+        case "request":
+          requestFormContainer.style.display = "block";
+          break;
+        case "complaint":
+          complaintFormContainer.style.display = "block";
+          break;
+        case "blotter":
+          blotterFormContainer.style.display = "block";
+          break;
+        case "tracking":
+          trackingContainer.style.display = "block";
+          loadResidentTracking();
+          break;
+      }
+    });
+  });
+
+  // My Submissions button handler
+  trackingBtn?.addEventListener("click", function() {
+    hideAllContainers();
+    trackingContainer.style.display = "block";
+    loadResidentTracking();
+  });
+
+  // Form submission handlers
+  document.getElementById("request-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitRequest();
+  });
+
+  document.getElementById("complaint-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitComplaint();
+  });
+
+  document.getElementById("blotter-form")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitBlotter();
+  });
+
+  // Tab switching for resident tracking
+  document.querySelectorAll(".tracking-tabs .tab-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const tabId = this.getAttribute("data-tab");
+
+      // Update active tab button
+      document.querySelectorAll(".tracking-tabs .tab-btn").forEach((b) => b.classList.remove("active"));
+      this.classList.add("active");
+
+      // Update active tab content
+      document.querySelectorAll(".tracking-content .tab-content").forEach((content) => {
+        content.classList.remove("active");
+      });
+      document.getElementById(`${tabId}-tab`).classList.add("active");
+    });
+  });
+
+  // Logout functionality
+  document.querySelectorAll(".logout-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      currentUser = null;
+      selectedRole = null;
+      hideAllContainers();
+      roleSelectionContainer.style.display = "flex";
+    });
+  });
+
+  // Back button functionality
+  document.querySelectorAll(".back-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      hideAllContainers();
+
+      if (currentUser) {
+        switch (currentUser.userType) {
+          case "resident":
+            residentContainer.style.display = "block";
+            break;
+          case "staff":
+            staffContainer.style.display = "block";
+            break;
+          case "admin":
+            adminContainer.style.display = "block";
+            break;
+          default:
+            loginContainer.style.display = "block";
+        }
+      } else {
+        loginContainer.style.display = "block";
+      }
+    });
+  });
+
+  // Load resident tracking data
+  function loadResidentTracking() {
+    if (!currentUser) return;
+
+    // Filter for current user's submissions
+    const userRequests = requests.filter((req) => req.email === currentUser.email);
+    const userComplaints = complaints.filter((comp) => comp.email === currentUser.email);
+    const userBlotters = blotters.filter((blot) => blot.email === currentUser.email);
+
+    // Populate requests table
+    const requestsList = document.getElementById("requests-list");
+    requestsList.innerHTML = userRequests
+      .map(
+        (req) => `
+      <tr>
+        <td>${req.id}</td>
+        <td>${req.type}</td>
+        <td>${new Date(req.date).toLocaleDateString()}</td>
+        <td class="status-${req.status}">${req.status}</td>
+      </tr>
+    `
+      )
+      .join("");
+
+    // Populate complaints table
+    const complaintsList = document.getElementById("complaints-list");
+    complaintsList.innerHTML = userComplaints
+      .map(
+        (comp) => `
+      <tr>
+        <td>${comp.id}</td>
+        <td>${comp.type}</td>
+        <td>${new Date(comp.date).toLocaleDateString()}</td>
+        <td class="status-${comp.status}">${comp.status}</td>
+      </tr>
+    `
+      )
+      .join("");
+
+    // Populate blotters table
+    const blottersList = document.getElementById("blotters-list");
+    blottersList.innerHTML = userBlotters
+      .map(
+        (blot) => `
+      <tr>
+        <td>${blot.id}</td>
+        <td>${blot.incidentType}</td>
+        <td>${new Date(blot.date).toLocaleDateString()}</td>
+        <td class="status-${blot.status}">${blot.status}</td>
+      </tr>
+    `
+      )
+      .join("");
+  }
+
+  // Submit request function
+  function submitRequest() {
+    const requestData = {
+      id: "REQ-" + Date.now(),
+      email: currentUser.email,
+      type: document.getElementById("docType").value,
+      firstName: document.getElementById("firstNameReq").value,
+      lastName: document.getElementById("lastNameReq").value,
+      address: document.getElementById("addressReq").value,
+      contactNumber: document.getElementById("contactNumberReq").value,
+      date: new Date().toISOString(),
+      status: "pending",
+    };
+
+    requests.push(requestData);
+    localStorage.setItem("requests", JSON.stringify(requests));
+    alert("Request submitted successfully!");
+
+    hideAllContainers();
+    residentContainer.style.display = "block";
+  }
+
+  // Submit complaint function
+  function submitComplaint() {
+    const complaintData = {
+      id: "COMP-" + Date.now(),
+      email: currentUser.email,
+      type: document.getElementById("typeOfComplaint").value,
+      firstName: document.getElementById("firstNameComp").value,
+      lastName: document.getElementById("middleNameComp").value,
+      address: document.getElementById("addressComp").value,
+      contactNumber: document.getElementById("contactNumberComp").value,
+      date: new Date().toISOString(),
+      status: "pending",
+    };
+
+    complaints.push(complaintData);
+    localStorage.setItem("complaints", JSON.stringify(complaints));
+    alert("Complaint submitted successfully!");
+
+    hideAllContainers();
+    residentContainer.style.display = "block";
+  }
+
+  // Submit blotter function
+  function submitBlotter() {
+    const blotterData = {
+      id: "BLOT-" + Date.now(),
+      email: currentUser.email,
+      mainComplaint: document.getElementById("mainComplaint").value,
+      otherComplaint: document.getElementById("otherComplaintName").value,
+      incidentLocation: document.getElementById("incidentLoc").value,
+      incidentType: document.getElementById("incidentType").value,
+      incidentDate: document.getElementById("dateOfIncident").value,
+      incidentTime: document.getElementById("timeOfIncident").value,
+      reportDate: document.getElementById("dateReported").value,
+      reportTime: document.getElementById("timeReported").value,
+      date: new Date().toISOString(),
+      status: "pending",
+    };
+
+    blotters.push(blotterData);
+    localStorage.setItem("blotters", JSON.stringify(blotters));
+    alert("Blotter submitted successfully!");
+
+    hideAllContainers();
+    residentContainer.style.display = "block";
+  }
+
+  // Load staff dashboard function
+  function loadStaffDashboard() {
+    // Get all submissions
+    requests = JSON.parse(localStorage.getItem("requests")) || [];
+    complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+    blotters = JSON.parse(localStorage.getItem("blotters")) || [];
+    const allUsers = JSON.parse(localStorage.getItem("users")) || [];
+
+    // Update counts
+    document.getElementById("pending-count").textContent =
+      requests.filter((r) => r.status === "pending").length +
+      complaints.filter((c) => c.status === "pending").length +
+      blotters.filter((b) => b.status === "pending").length;
+
+    document.getElementById("processing-count").textContent =
+      requests.filter((r) => r.status === "processing").length +
+      complaints.filter((c) => c.status === "processing").length +
+      blotters.filter((b) => b.status === "processing").length;
+
+    document.getElementById("completed-count").textContent =
+      requests.filter((r) => r.status === "completed").length +
+      complaints.filter((c) => c.status === "completed").length +
+      blotters.filter((b) => b.status === "completed").length;
+
+    // Populate requests table
+    const requestsList = document.getElementById("staff-requests-list");
+    requestsList.innerHTML = requests
+      .map((req) => {
+        const user = allUsers.find((u) => u.email === req.email) || {};
+        return `
+      <tr>
+        <td>${req.id}</td>
+        <td>${user.firstName || ""} ${user.lastName || ""}</td>
+        <td>${req.type}</td>
+        <td>${new Date(req.date).toLocaleDateString()}</td>
+        <td class="status-${req.status}">${req.status}</td>
+        <td>
+          <select class="status-select" data-type="request" data-id="${req.id}">
+            <option value="pending" ${req.status === "pending" ? "selected" : ""}>Pending</option>
+            <option value="processing" ${req.status === "processing" ? "selected" : ""}>Processing</option>
+            <option value="completed" ${req.status === "completed" ? "selected" : ""}>Completed</option>
+          </select>
+        </td>
+        <td>
+          <button class="update-btn" data-type="request" data-id="${req.id}">Update</button>
+        </td>
+      </tr>
+    `;
+      })
+      .join("");
+
+    // Populate complaints table
+    const complaintsList = document.getElementById("staff-complaints-list");
+    complaintsList.innerHTML = complaints
+      .map((comp) => {
+        const user = allUsers.find((u) => u.email === comp.email) || {};
+        return `
+      <tr>
+        <td>${comp.id}</td>
+        <td>${user.firstName || ""} ${user.lastName || ""}</td>
+        <td>${comp.type}</td>
+        <td>${new Date(comp.date).toLocaleDateString()}</td>
+        <td class="status-${comp.status}">${comp.status}</td>
+        <td>
+          <select class="status-select" data-type="complaint" data-id="${comp.id}">
+            <option value="pending" ${comp.status === "pending" ? "selected" : ""}>Pending</option>
+            <option value="processing" ${comp.status === "processing" ? "selected" : ""}>Processing</option>
+            <option value="completed" ${comp.status === "completed" ? "selected" : ""}>Completed</option>
+          </select>
+        </td>
+        <td>
+          <button class="update-btn" data-type="complaint" data-id="${comp.id}">Update</button>
+        </td>
+      </tr>
+    `;
+      })
+      .join("");
+
+    // Populate blotters table
+    const blottersList = document.getElementById("staff-blotters-list");
+    blottersList.innerHTML = blotters
+      .map((blot) => {
+        const user = allUsers.find((u) => u.email === blot.email) || {};
+        return `
+      <tr>
+        <td>${blot.id}</td>
+        <td>${user.firstName || ""} ${user.lastName || ""}</td>
+        <td>${blot.incidentType}</td>
+        <td>${new Date(blot.date).toLocaleDateString()}</td>
+        <td class="status-${blot.status}">${blot.status}</td>
+        <td>
+          <select class="status-select" data-type="blotter" data-id="${blot.id}">
+            <option value="pending" ${blot.status === "pending" ? "selected" : ""}>Pending</option>
+            <option value="processing" ${blot.status === "processing" ? "selected" : ""}>Processing</option>
+            <option value="completed" ${blot.status === "completed" ? "selected" : ""}>Completed</option>
+          </select>
+        </td>
+        <td>
+          <button class="update-btn" data-type="blotter" data-id="${blot.id}">Update</button>
+        </td>
+      </tr>
+    `;
+      })
+      .join("");
+
+    // Set up tab switching for staff dashboard
+    document.querySelectorAll(".submission-tabs .tab-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const tabId = this.getAttribute("data-tab");
+
+        // Update active tab button
+        document.querySelectorAll(".submission-tabs .tab-btn").forEach((b) => b.classList.remove("active"));
+        this.classList.add("active");
+
+        // Update active tab content
+        document.querySelectorAll(".submission-content .tab-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+        document.getElementById(`${tabId}-tab-staff`).classList.add("active");
+      });
+    });
+  }
+
+  // Status update handler
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("update-btn")) {
+      const type = e.target.getAttribute("data-type");
+      const id = e.target.getAttribute("data-id");
+      const select = document.querySelector(`.status-select[data-type="${type}"][data-id="${id}"]`);
+      const newStatus = select.value;
+
+      // Update in localStorage
+      let items;
+      if (type === "request") {
+        items = requests;
+      } else if (type === "complaint") {
+        items = complaints;
+      } else if (type === "blotter") {
+        items = blotters;
+      }
+
+      const itemIndex = items.findIndex((item) => item.id === id);
+      if (itemIndex !== -1) {
+        items[itemIndex].status = newStatus;
+        // Add who updated this
+        items[itemIndex].updatedBy = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Staff";
+
+        // Save back to localStorage
+        if (type === "request") {
+          localStorage.setItem("requests", JSON.stringify(items));
+        } else if (type === "complaint") {
+          localStorage.setItem("complaints", JSON.stringify(items));
+        } else if (type === "blotter") {
+          localStorage.setItem("blotters", JSON.stringify(items));
+        }
+
+        alert("Status updated successfully!");
+        loadStaffDashboard();
+      }
+    }
+  });
+
+  // Load admin dashboard
+  function loadAdminDashboard() {
+    const allUsers = JSON.parse(localStorage.getItem("users")) || [];
+    requests = JSON.parse(localStorage.getItem("requests")) || [];
+    complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+    blotters = JSON.parse(localStorage.getItem("blotters")) || [];
+
+    // Update counts
+    document.getElementById("total-users").textContent = allUsers.length;
+    document.getElementById("active-staff").textContent = allUsers.filter(
+      (u) => u.userType === "staff"
+    ).length;
+    document.getElementById("pending-issues").textContent =
+      requests.filter((r) => r.status === "pending").length +
+      complaints.filter((c) => c.status === "pending").length +
+      blotters.filter((b) => b.status === "pending").length;
+
+    // Populate resident email dropdown
+    const residentEmailSelect = document.getElementById("resident-email");
+    residentEmailSelect.innerHTML =
+      '<option value="">Select Resident</option>' +
+      allUsers
+        .filter((u) => u.userType === "resident")
+        .map(
+          (user) =>
+            `<option value="${user.email}">${user.firstName} ${user.lastName} (${user.email})</option>`
+        )
+        .join("");
+
+    // Load status board
+    loadAdminStatusBoard();
+
+    // Admin navigation button handlers
+    document.querySelectorAll(".admin-nav-btn").forEach((btn) => {
+      btn.addEventListener("click", function() {
+        const page = this.getAttribute("data-page");
         
-        if (!user) {
-            throw new Error('Invalid username or password');
-        }
-        return user;
-    }
-
-    function handleSignup(e) {
-        e.preventDefault();
-        try {
-            const formData = {
-                name: document.getElementById('signupName').value.trim(),
-                email: document.getElementById('signupEmail').value.trim(),
-                username: document.getElementById('signupUsername').value.trim(),
-                password: document.getElementById('signupPassword').value,
-                confirmPassword: document.getElementById('signupConfirmPassword').value,
-                role: document.getElementById('userRole').value
-            };
-
-            validateSignup(formData);
-            const newUser = createUserAccount(formData);
-            
-            userAccounts.push(newUser);
-            localStorage.setItem('userAccounts', JSON.stringify(userAccounts));
-            
-            showLoginPage();
-            signupForm.reset();
-            
-            console.log("Signup successful:", newUser.username);
-            alert('Account created successfully! Please login.');
-        } catch (error) {
-            console.error("Signup error:", error.message);
-            alert(error.message);
-        }
-    }
-
-    function validateSignup(formData) {
-        if (!formData.name || !formData.email || !formData.username || 
-            !formData.password || !formData.confirmPassword || !formData.role) {
-            throw new Error('Please fill in all fields');
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-            throw new Error('Passwords do not match');
-        }
-
-        if (userAccounts.some(account => account.username.toLowerCase() === formData.username.toLowerCase())) {
-            throw new Error('Username already exists');
-        }
-
-        if (userAccounts.some(account => account.email.toLowerCase() === formData.email.toLowerCase())) {
-            throw new Error('Email already registered');
-        }
-
-        if (formData.password.length < 6) {
-            throw new Error('Password must be at least 6 characters long');
-        }
-    }
-
-    function createUserAccount(formData) {
-        return { 
-            id: Date.now().toString(),
-            username: formData.username, 
-            password: formData.password, 
-            name: formData.name, 
-            email: formData.email,
-            role: formData.role 
-        };
-    }
-
-    function logout() {
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-            console.log("Logging out user:", currentUser.username);
-        }
+        // Update active button
+        document.querySelectorAll(".admin-nav-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
         
-        sessionStorage.removeItem('currentUser');
-        showLoginPage();
-        resetAllForms();
-    }
-
-    function handleComplaintSubmit(e) {
-        e.preventDefault();
-        try {
-            const currentUser = getCurrentUser();
-            if (!currentUser || currentUser.role !== 'resident') {
-                throw new Error('Only residents can submit complaints');
-            }
-
-            const formData = collectComplaintFormData();
-            validateComplaintForm(formData);
-            
-            const newComplaint = createComplaint(formData, currentUser);
-            complaints.push(newComplaint);
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateAllViews();
-            complaintForm.reset();
-            
-            console.log("Complaint submitted:", newComplaint.id);
-            alert('Complaint submitted successfully!');
-        } catch (error) {
-            console.error("Complaint submission error:", error.message);
-            alert(error.message);
-        }
-    }
-
-    function collectComplaintFormData() {
-        return {
-            name: document.getElementById('residentName').value.trim(),
-            age: document.getElementById('residentAge').value.trim(),
-            address: document.getElementById('residentAddress').value.trim(),
-            email: document.getElementById('residentEmail').value.trim(),
-            contact: document.getElementById('residentContact').value.trim(),
-            type: document.getElementById('complaintType').value,
-            details: document.getElementById('complaintDetails').value.trim(),
-            location: document.getElementById('complaintLocation').value.trim(),
-            photoFile: document.getElementById('photoUpload').files[0]
-        };
-    }
-
-    function validateComplaintForm(formData) {
-        if (!formData.name || !formData.age || !formData.address || 
-            !formData.email || !formData.contact || !formData.type || 
-            !formData.details || !formData.location) {
-            throw new Error('Please fill in all required fields');
-        }
-    }
-
-    function createComplaint(formData, currentUser) {
-        return {
-            id: complaints.length > 0 ? Math.max(...complaints.map(c => c.id)) + 1 : 1,
-            residentName: formData.name,
-            residentAge: formData.age,
-            residentAddress: formData.address,
-            residentEmail: formData.email,
-            residentContact: formData.contact,
-            residentUsername: currentUser.username,
-            residentId: currentUser.id,
-            type: formData.type,
-            details: formData.details,
-            location: formData.location,
-            date: new Date().toISOString().split('T')[0],
-            status: 'Pending',
-            photo: formData.photoFile ? URL.createObjectURL(formData.photoFile) : null,
-            assignedStaff: '',
-            resolutionNotes: '',
-            createdBy: currentUser.username,
-            createdById: currentUser.id
-        };
-    }
-
-    function handleAdminReportSubmit(e) {
-        e.preventDefault();
-        try {
-            const currentUser = getCurrentUser();
-            if (!currentUser || currentUser.role !== 'admin') {
-                throw new Error('Only admin can submit reports');
-            }
-
-            const complaintId = parseInt(adminComplaintSelect.value);
-            const feedback = document.getElementById('adminReportFeedback').value.trim();
-
-            if (!complaintId || !feedback) {
-                throw new Error('Please select a complaint and provide feedback');
-            }
-
-            updateComplaintResolution(complaintId, feedback, currentUser.name);
-            updateAllViews();
-            adminReportForm.reset();
-            populateAdminComplaintDropdown();
-            
-            console.log("Admin report submitted for complaint:", complaintId);
-            alert('Feedback submitted successfully!');
-        } catch (error) {
-            console.error("Admin report error:", error.message);
-            alert(error.message);
-        }
-    }
-
-    function updateComplaintResolution(complaintId, feedback, staffName) {
-        const complaint = complaints.find(c => c.id === complaintId);
-        if (complaint) {
-            complaint.resolutionNotes = feedback;
-            complaint.status = 'Resolved';
-            complaint.assignedStaff = staffName;
-            localStorage.setItem('complaints', JSON.stringify(complaints));
+        // Show the correct page
+        if (page === "dashboard") {
+          document.querySelector(".admin-actions").style.display = "block";
+          document.getElementById("admin-status-board").style.display = "none";
         } else {
-            throw new Error('Complaint not found');
+          document.querySelector(".admin-actions").style.display = "none";
+          document.getElementById("admin-status-board").style.display = "block";
+          loadAdminStatusBoard();
         }
-    }
+      });
+    });
 
-    function showDashboard(user) {
-        loginPage.style.display = 'none';
-        signupPage.style.display = 'none';
-        dashboardPage.style.display = 'block';
-        updateUIForUserRole(user.role);
-    }
+    // Tab switching for admin status board
+    document.querySelectorAll("#admin-status-board .tab-btn").forEach((btn) => {
+      btn.addEventListener("click", function() {
+        const tabId = this.getAttribute("data-tab");
 
-    function showLoginPage() {
-        loginPage.style.display = 'flex';
-        signupPage.style.display = 'none';
-        dashboardPage.style.display = 'none';
-    }
+        // Update active tab button
+        document.querySelectorAll("#admin-status-board .tab-btn").forEach((b) => b.classList.remove("active"));
+        this.classList.add("active");
 
-    function updateUIForUserRole(role) {
-        userRoleDisplay.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-        
-        staffDashboard.style.display = 'none';
-        complaintFormSection.style.display = 'none';
-        adminReportFormSection.style.display = 'none';
-        trackingDashboard.style.display = 'none';
-        generateReportBtn.style.display = 'none';
-        
-        if (role === 'resident') {
-            complaintFormSection.style.display = 'block';
-            trackingDashboard.style.display = 'block';
-        } else if (role === 'staff') {
-            staffDashboard.style.display = 'block';
-        } else if (role === 'admin') {
-            staffDashboard.style.display = 'block';
-            adminReportFormSection.style.display = 'block';
-            generateReportBtn.style.display = 'block';
-        }
-    }
-
-    function updateAllViews() {
-        updateComplaintsTable();
-        updateManageComplaintsTable();
-        updateResolvedComplaintsGrid();
-        populateAdminComplaintDropdown();
-    }
-
-    function updateComplaintsTable() {
-        const currentUser = getCurrentUser();
-        if (!currentUser) return;
-
-        const statusFilterValue = statusFilter.value;
-        let filteredComplaints = complaints.filter(c => 
-            c.createdById === currentUser.id && 
-            c.createdBy === currentUser.username
-        );
-
-        if (statusFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(c => c.status === statusFilterValue);
-        }
-
-        renderTable(
-            complaintsList,
-            filteredComplaints,
-            ['id', 'type', 'date', 'status', 'location'],
-            ['ID', 'Type', 'Date', 'Status', 'Location'],
-            true
-        );
-    }
-
-    function updateManageComplaintsTable() {
-        const currentUser = getCurrentUser();
-        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'staff')) return;
-
-        const statusFilterValue = manageStatusFilter.value;
-        const searchValue = searchComplaints.value.toLowerCase();
-        
-        let filteredComplaints = [...complaints];
-        
-        if (statusFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(c => c.status === statusFilterValue);
-        }
-        
-        if (searchValue) {
-            filteredComplaints = filteredComplaints.filter(c => 
-                c.type.toLowerCase().includes(searchValue) ||
-                c.residentName.toLowerCase().includes(searchValue) ||
-                c.location.toLowerCase().includes(searchValue)
-            );
-        }
-
-        renderTable(
-            manageComplaintsList,
-            filteredComplaints,
-            ['id', 'type', 'residentName', 'date', 'status', 'location'],
-            ['ID', 'Type', 'Resident', 'Date', 'Status', 'Location'],
-            currentUser.role === 'admin'
-        );
-    }
-
-    function renderTable(container, data, properties, headers, showActions) {
-        container.innerHTML = '';
-
-        if (data.length === 0) {
-            container.innerHTML = `<tr><td colspan="${headers.length + 1}" style="text-align: center;">No complaints found</td></tr>`;
-            return;
-        }
-
-        data.forEach(item => {
-            const row = document.createElement('tr');
-            
-            properties.forEach(prop => {
-                const cell = document.createElement('td');
-                if (prop === 'status') {
-                    cell.innerHTML = `<span class="status-badge status-${item[prop].toLowerCase().replace(' ', '-')}">${item[prop]}</span>`;
-                } else {
-                    cell.textContent = item[prop];
-                }
-                row.appendChild(cell);
-            });
-
-            const actionCell = document.createElement('td');
-            actionCell.innerHTML = `
-                <button class="action-btn view-btn" data-id="${item.id}">View</button>
-                ${showActions ? `<button class="action-btn delete-btn" data-id="${item.id}">Delete</button>` : ''}
-            `;
-            row.appendChild(actionCell);
-
-            container.appendChild(row);
+        // Update active tab content
+        document.querySelectorAll("#admin-status-board .tab-content").forEach((content) => {
+          content.classList.remove("active");
         });
+        document.getElementById(`${tabId}-tab-admin`).classList.add("active");
+      });
+    });
+  }
 
-        container.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', () => showComplaintDetails(parseInt(btn.dataset.id)));
-        });
+  // Load admin status board function
+  function loadAdminStatusBoard() {
+    const allUsers = JSON.parse(localStorage.getItem("users")) || [];
+    requests = JSON.parse(localStorage.getItem("requests")) || [];
+    complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+    blotters = JSON.parse(localStorage.getItem("blotters")) || [];
 
-        container.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => deleteComplaint(parseInt(btn.dataset.id)));
-        });
-    }
-
-    function updateResolvedComplaintsGrid() {
-        const typeFilterValue = publicTypeFilter.value;
-        let filteredComplaints = complaints.filter(c => c.status === 'Resolved');
-        
-        if (typeFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(c => c.type === typeFilterValue);
-        }
-
-        renderComplaintCards(filteredComplaints);
-    }
-
-    function renderComplaintCards(complaints) {
-        resolvedComplaintsGrid.innerHTML = '';
-
-        if (complaints.length === 0) {
-            resolvedComplaintsGrid.innerHTML = `
-                <div class="no-complaints">
-                    <p>No resolved complaints to display</p>
-                </div>
-            `;
-            return;
-        }
-
-        complaints.forEach(complaint => {
-            const card = document.createElement('div');
-            card.className = 'complaint-card';
-            card.innerHTML = `
-                <h3>${complaint.type}</h3>
-                <div class="complaint-meta">
-                    <span>${complaint.date}</span>
-                    <span>${complaint.location}</span>
-                </div>
-                <div class="complaint-description">
-                    <p>${complaint.details.substring(0, 100)}${complaint.details.length > 100 ? '...' : ''}</p>
-                </div>
-                ${complaint.photo ? `<img src="${complaint.photo}" alt="Complaint photo" class="complaint-image">` : ''}
-                <button class="action-btn view-btn" data-id="${complaint.id}">View Details</button>
-            `;
-            resolvedComplaintsGrid.appendChild(card);
-        });
-
-        resolvedComplaintsGrid.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', () => showComplaintDetails(parseInt(btn.dataset.id)));
-        });
-    }
-
-    function showComplaintDetails(complaintId) {
-        const complaint = complaints.find(c => c.id === complaintId);
-        if (!complaint) return;
-
-        modalTitle.textContent = `${complaint.type} (ID: ${complaint.id})`;
-        
-        modalBody.innerHTML = `
-            <div class="complaint-detail">
-                <h3>Complaint Details</h3>
-                <p>${complaint.details}</p>
-            </div>
-            <div class="complaint-meta">
-                <div><strong>Submitted by:</strong> ${complaint.residentName}</div>
-                <div><strong>Date:</strong> ${complaint.date}</div>
-                <div><strong>Location:</strong> ${complaint.location}</div>
-                <div><strong>Status:</strong> <span class="status-badge status-${complaint.status.toLowerCase().replace(' ', '-')}">${complaint.status}</span></div>
-                ${complaint.assignedStaff ? `<div><strong>Assigned Staff:</strong> ${complaint.assignedStaff}</div>` : ''}
-                ${complaint.resolutionNotes ? `
-                <div class="admin-feedback">
-                    <h3>Admin Feedback/Solution</h3>
-                    <p>${complaint.resolutionNotes}</p>
-                </div>
-                ` : ''}
-            </div>
-            ${complaint.photo ? `<div class="complaint-photo">
-                <img src="${complaint.photo}" alt="Complaint photo">
-            </div>` : ''}
+    // Populate requests table
+    const requestsList = document.getElementById("admin-requests-list");
+    requestsList.innerHTML = requests
+      .map((req) => {
+        const user = allUsers.find((u) => u.email === req.email) || {};
+        return `
+          <tr>
+            <td>${req.id}</td>
+            <td>${user.firstName || ""} ${user.lastName || ""}</td>
+            <td>${req.type}</td>
+            <td>${new Date(req.date).toLocaleDateString()}</td>
+            <td class="status-${req.status}">${req.status}</td>
+            <td>${req.updatedBy || "N/A"}</td>
+          </tr>
         `;
+      })
+      .join("");
 
-        updateModalActions(complaint);
-        modal.style.display = 'block';
+    // Populate complaints table
+    const complaintsList = document.getElementById("admin-complaints-list");
+    complaintsList.innerHTML = complaints
+      .map((comp) => {
+        const user = allUsers.find((u) => u.email === comp.email) || {};
+        return `
+          <tr>
+            <td>${comp.id}</td>
+            <td>${user.firstName || ""} ${user.lastName || ""}</td>
+            <td>${comp.type}</td>
+            <td>${new Date(comp.date).toLocaleDateString()}</td>
+            <td class="status-${comp.status}">${comp.status}</td>
+            <td>${comp.updatedBy || "N/A"}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    // Populate blotters table
+    const blottersList = document.getElementById("admin-blotters-list");
+    blottersList.innerHTML = blotters
+      .map((blot) => {
+        const user = allUsers.find((u) => u.email === blot.email) || {};
+        return `
+          <tr>
+            <td>${blot.id}</td>
+            <td>${user.firstName || ""} ${user.lastName || ""}</td>
+            <td>${blot.incidentType}</td>
+            <td>${new Date(blot.date).toLocaleDateString()}</td>
+            <td class="status-${blot.status}">${blot.status}</td>
+            <td>${blot.updatedBy || "N/A"}</td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+  
+  // Store new notification
+  function addResidentNotification(email, subject, message) {
+    const current = JSON.parse(localStorage.getItem("residentNotifications") || "[]");
+    const newNotif = {
+      email,
+      subject,
+      message,
+      time: new Date().toLocaleString()
+    };
+    current.push(newNotif);
+    localStorage.setItem("residentNotifications", JSON.stringify(current));
+
+    // If resident is currently logged in and matches, show popup
+    const active = localStorage.getItem("loggedInResident");
+    if (active && active === email) {
+      alert(`📬 New Notification:\n${subject}\n${message}`);
+      showResidentNotifications(email); // Refresh panel
     }
+  }
 
-    function updateModalActions(complaint) {
-        modalActions.innerHTML = '';
-        const currentUser = getCurrentUser();
-        
-        if (!currentUser) return;
+  // Display notifications for a resident
+  function showResidentNotifications(currentEmail) {
+    const notifList = document.getElementById("notif-list");
+    const notifCount = document.getElementById("notif-count");
+    const all = JSON.parse(localStorage.getItem("residentNotifications") || "[]");
+    const userNotifs = all.filter(n => n.email === currentEmail);
 
-        if (currentUser.role === 'staff' && complaint.resolutionNotes) {
-            modalActions.innerHTML += `
-                <button class="action-btn print-btn" id="printFeedbackBtn" data-id="${complaint.id}">Print Feedback</button>
-            `;
-            
-            document.getElementById('printFeedbackBtn').addEventListener('click', () => printFeedback(complaint));
-        }
-
-        if (currentUser.role === 'staff' || currentUser.role === 'admin') {
-            if (complaint.status === 'Pending') {
-                modalActions.innerHTML += `
-                    <button class="action-btn edit-btn" id="assignToMeBtn" data-id="${complaint.id}">Assign to Me</button>
-                    <button class="action-btn edit-btn" id="startProgressBtn" data-id="${complaint.id}">Start Progress</button>
-                `;
-            } else if (complaint.status === 'In Progress') {
-                modalActions.innerHTML += `
-                    <button class="action-btn edit-btn" id="resolveBtn" data-id="${complaint.id}">Mark as Resolved</button>
-                `;
-            }
-            
-            document.getElementById('assignToMeBtn')?.addEventListener('click', () => assignComplaintToMe(complaint.id));
-            document.getElementById('startProgressBtn')?.addEventListener('click', () => updateComplaintStatus(complaint.id, 'In Progress'));
-            document.getElementById('resolveBtn')?.addEventListener('click', () => {
-                const resolutionNotes = prompt('Enter resolution notes:');
-                if (resolutionNotes !== null) {
-                    updateComplaintStatus(complaint.id, 'Resolved', resolutionNotes);
-                }
-            });
-        }
-
-        if (currentUser.role === 'admin') {
-            modalActions.innerHTML += `
-                <button class="action-btn delete-btn" id="deleteBtn" data-id="${complaint.id}">Delete</button>
-            `;
-            
-            document.getElementById('deleteBtn')?.addEventListener('click', () => deleteComplaint(complaint.id));
-        }
+    notifList.innerHTML = "";
+    if (userNotifs.length > 0) {
+      notifCount.textContent = userNotifs.length;
+      userNotifs.reverse().forEach(n => {
+        const li = document.createElement("li");
+        li.textContent = `${n.subject}: ${n.message} (${n.time})`;
+        notifList.appendChild(li);
+      });
+    } else {
+      notifList.innerHTML = "<li>No notifications.</li>";
+      notifCount.textContent = "0";
     }
+  }
 
-    function closeModal() {
-        modal.style.display = 'none';
-    }
+  // Setup event listeners for notifications
+  const notifIcon = document.getElementById("notif-icon");
+  const notifPanel = document.getElementById("notif-panel");
 
-    function assignComplaintToMe(complaintId) {
-        const currentUser = getCurrentUser();
-        const complaint = complaints.find(c => c.id === complaintId);
-        
-        if (complaint && currentUser) {
-            complaint.assignedStaff = currentUser.name;
-            complaint.status = 'In Progress';
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateAllViews();
-            closeModal();
-            alert('Complaint has been assigned to you and marked as In Progress');
-        }
-    }
+  // Toggle notification dropdown
+  if (notifIcon) {
+    notifIcon.addEventListener("click", () => {
+      notifPanel.style.display = notifPanel.style.display === "none" ? "block" : "none";
+    });
+  }
 
-    function updateComplaintStatus(complaintId, status, resolutionNotes = '') {
-        const complaint = complaints.find(c => c.id === complaintId);
-        
-        if (complaint) {
-            complaint.status = status;
-            if (resolutionNotes) {
-                complaint.resolutionNotes = resolutionNotes;
-            }
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateAllViews();
-            closeModal();
-            alert(`Complaint status updated to ${status}`);
-        }
-    }
+  // Admin email form listener
+  const waitForAdminForm = setInterval(() => {
+    const emailForm = document.getElementById("email-form");
+    if (emailForm && !emailForm.dataset.listenerAdded) {
+      emailForm.addEventListener("submit", function (e) {
+        e.preventDefault();
 
-    function deleteComplaint(complaintId) {
-        const currentUser = getCurrentUser();
-        if (!currentUser || currentUser.role !== 'admin') {
-            alert('Only admin can delete complaints');
-            return;
-        }
-        
-        if (confirm('Are you sure you want to delete this complaint?')) {
-            complaints = complaints.filter(c => c.id !== complaintId);
-            localStorage.setItem('complaints', JSON.stringify(complaints));
-            
-            updateAllViews();
-            closeModal();
-            alert('Complaint deleted successfully');
-        }
-    }
+        const email = document.getElementById("resident-email").value.trim();
+        const subject = document.getElementById("email-subject").value.trim();
+        const message = document.getElementById("email-message").value.trim();
 
-    function printFeedback(complaint) {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Feedback for Complaint #${complaint.id}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    h1 { color: #166088; }
-                    .complaint-info { margin-bottom: 20px; }
-                    .feedback { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #166088; }
-                </style>
-            </head>
-            <body>
-                <h1>Feedback for Complaint #${complaint.id}</h1>
-                <div class="complaint-info">
-                    <p><strong>Type:</strong> ${complaint.type}</p>
-                    <p><strong>Submitted by:</strong> ${complaint.residentName}</p>
-                    <p><strong>Date:</strong> ${complaint.date}</p>
-                    <p><strong>Location:</strong> ${complaint.location}</p>
-                </div>
-                <div class="feedback">
-                    <h3>Admin Feedback/Solution</h3>
-                    <p>${complaint.resolutionNotes}</p>
-                </div>
-                <script>
-                    setTimeout(function() {
-                        window.print();
-                        window.close();
-                    }, 500);
-                </script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-    }
-
-    function generateReport() {
-        const currentUser = getCurrentUser();
-        if (!currentUser || currentUser.role !== 'admin') {
-            alert('Only admin can generate reports');
-            return;
-        }
-        
-        const currentDate = new Date().toLocaleDateString();
-        const statusFilterValue = manageStatusFilter.value;
-        const searchValue = searchComplaints.value.toLowerCase();
-        
-        let filteredComplaints = [...complaints];
-        
-        if (statusFilterValue !== 'all') {
-            filteredComplaints = filteredComplaints.filter(c => c.status === statusFilterValue);
-        }
-        
-        if (searchValue) {
-            filteredComplaints = filteredComplaints.filter(c => 
-                c.type.toLowerCase().includes(searchValue) ||
-                c.residentName.toLowerCase().includes(searchValue) ||
-                c.location.toLowerCase().includes(searchValue)
-            );
-        }
-        
-        const reportWindow = window.open('', '_blank');
-        reportWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Barangay Complaints Report</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    h1 { color: #166088; text-align: center; }
-                    .report-info { margin-bottom: 20px; text-align: center; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #166088; color: white; }
-                    .status-badge { padding: 3px 8px; border-radius: 3px; font-size: 0.8em; }
-                    .status-pending { background-color: #ffc107; color: black; }
-                    .status-in-progress { background-color: #17a2b8; color: white; }
-                    .status-resolved { background-color: #28a745; color: white; }
-                    .footer { margin-top: 30px; text-align: right; font-style: italic; }
-                    @page { size: landscape; }
-                </style>
-            </head>
-            <body>
-                <h1>Barangay Complaints Report</h1>
-                <div class="report-info">
-                    <p>Generated on: ${currentDate}</p>
-                    <p>Total Complaints: ${filteredComplaints.length}</p>
-                    ${statusFilterValue !== 'all' ? `<p>Filtered by status: ${statusFilterValue}</p>` : ''}
-                    ${searchValue ? `<p>Search term: "${searchValue}"</p>` : ''}
-                </div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Type</th>
-                            <th>Resident</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Location</th>
-                            <th>Assigned Staff</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filteredComplaints.map(c => `
-                            <tr>
-                                <td>${c.id}</td>
-                                <td>${c.type}</td>
-                                <td>${c.residentName}</td>
-                                <td>${c.date}</td>
-                                <td><span class="status-badge status-${c.status.toLowerCase().replace(' ', '-')}">${c.status}</span></td>
-                                <td>${c.location}</td>
-                                <td>${c.assignedStaff || 'Not assigned'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="footer">
-                    <p>Barangay Complaint & Request Management System</p>
-                </div>
-                
-                <script>
-                    setTimeout(function() {
-                        window.print();
-                        window.close();
-                    }, 500);
-                </script>
-            </body>
-            </html>
-        `);
-        reportWindow.document.close();
-    }
-
-    function getCurrentUser() {
-        return JSON.parse(sessionStorage.getItem('currentUser'));
-    }
-
-    function resetAllForms() {
-        [loginForm, signupForm, complaintForm, adminReportForm].forEach(form => form?.reset());
-    }
-
-    function populateAdminComplaintDropdown() {
-        adminComplaintSelect.innerHTML = '<option value="" disabled selected>Select a complaint to respond to</option>';
-        
-        const pendingComplaints = complaints.filter(c => c.status === 'Pending' || c.status === 'In Progress');
-        
-        pendingComplaints.forEach(c => {
-            const option = document.createElement('option');
-            option.value = c.id;
-            option.textContent = `ID: ${c.id} - ${c.type} (${c.residentName})`;
-            adminComplaintSelect.appendChild(option);
-        });
-    }
-
-    function setupEventListeners() {
-        showSignup.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginPage.style.display = 'none';
-            signupPage.style.display = 'flex';
-        });
-
-        showLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            signupPage.style.display = 'none';
-            loginPage.style.display = 'flex';
-        });
-
-        togglePasswordLogin.addEventListener('click', () => 
-            togglePasswordVisibility(passwordLogin, togglePasswordLogin));
-        
-        togglePasswordSignup.addEventListener('click', () => 
-            togglePasswordVisibility(passwordSignup, togglePasswordSignup));
-        
-        toggleConfirmPassword.addEventListener('click', () => 
-            togglePasswordVisibility(confirmPassword, toggleConfirmPassword));
-
-        loginForm.addEventListener('submit', handleLogin);
-        signupForm.addEventListener('submit', handleSignup);
-        complaintForm.addEventListener('submit', handleComplaintSubmit);
-        adminReportForm.addEventListener('submit', handleAdminReportSubmit);
-
-        logoutBtn.addEventListener('click', logout);
-        statusFilter.addEventListener('change', updateComplaintsTable);
-        manageStatusFilter.addEventListener('change', updateManageComplaintsTable);
-        searchComplaints.addEventListener('input', updateManageComplaintsTable);
-        generateReportBtn.addEventListener('click', generateReport);
-        publicTypeFilter.addEventListener('change', updateResolvedComplaintsGrid);
-        closeModalBtn.addEventListener('click', closeModal);
-    }
-
-    function togglePasswordVisibility(inputField, toggleButton) {
-        if (inputField.type === 'password') {
-            inputField.type = 'text';
-            toggleButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
-                    <path d="M22 2L2 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            `;
+        if (email && subject && message) {
+          addResidentNotification(email, subject, message);
+          alert(`📧 Simulated Email Sent to: ${email}`);
+          emailForm.reset();
         } else {
-            inputField.type = 'password';
-            toggleButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 6c-3.95 0-7.2 2.3-9 6 1.8 3.7 5.05 6 9 6s7.2-2.3 9-6c-1.8-3.7-5.05-6-9-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6.5A2.5 2.5 0 0 0 9.5 12 2.5 2.5 0 0 0 12 14.5 2.5 2.5 0 0 0 14.5 12 2.5 2.5 0 0 0 12 9.5z"/>
-                </svg>
-            `;
+          alert("⚠️ Please fill all fields.");
         }
-    }
+      });
 
-    init();
+      emailForm.dataset.listenerAdded = "true";
+      clearInterval(waitForAdminForm);
+    }
+  }, 500);
 });
