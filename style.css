@@ -230,6 +230,50 @@ body {
   font-size: 1.5rem;
 }
 
+/* Form Title Styling Fixes */
+#request-form-container .header h2,
+#complaint-form-container .header h2,
+#other-form-container .header h2 {
+  color: #000000 !important;
+  font-size: 1.5rem !important;
+  margin-bottom: 15px !important;
+  text-align: center !important;
+  font-weight: bold !important;
+}
+
+/* Form Container Styling */
+#request-form-container,
+#complaint-form-container,
+#other-form-container {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Form Label Styling */
+#request-form-container .form-group label,
+#complaint-form-container .form-group label,
+#other-form-container .form-group label {
+  color: #000000 !important;
+  font-weight: 500;
+}
+
+/* Form Input Styling */
+#request-form-container input,
+#request-form-container select,
+#request-form-container textarea,
+#complaint-form-container input,
+#complaint-form-container select,
+#complaint-form-container textarea,
+#other-form-container input,
+#other-form-container select,
+#other-form-container textarea {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #cccccc !important;
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .nav-controls,
 .form-container,
 .stats,
@@ -1054,10 +1098,6 @@ textarea {
 
   .logo {
     width: 100px;
-  }
-
-  .website-title {
-    font-size: 1.5em;
   }
 
   .role-options,
