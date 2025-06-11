@@ -651,7 +651,7 @@ trackingBtns.forEach(btn => {
           </div>
         </div>
         <div class="modal-footer">
-          ${currentUser?.userType === 'admin' || 'staff' ? 
+          ${currentUser?.userType === 'admin' || currentUser?.userType === 'staff' ? 
             `<button class="btn print-btn" data-id="${itemId}" data-type="${itemType}">Print</button>` : ''}
           ${currentUser?.userType === 'staff' ? 
             `<button class="btn delete-btn" data-id="${itemId}" data-type="${itemType}"><img src="images/delete.png" alt="Delete" style="width: auto; height: 16px;"></button>` : ''}
@@ -678,7 +678,7 @@ trackingBtns.forEach(btn => {
       printItemDetails(item, itemType);
     });
     
-    // Delete button handler (admin only)
+    // Delete button handler (staff only)
     modal.querySelector(".delete-btn")?.addEventListener("click", function() {
       if (confirm("Are you sure you want to delete this item?")) {
         const index = collection.findIndex(i => i.id === itemId);
@@ -695,9 +695,11 @@ trackingBtns.forEach(btn => {
             otherServices = collection;
           }
           
-          // Reload the tracking view if we're there
+          // Reload the appropriate view
           if (trackingContainer && trackingContainer.style.display === "block") {
             loadResidentTracking();
+          } else if (staffDashboard && staffDashboard.style.display === "block") {
+            loadStaffDashboard();
           }
           
           // Close modal
@@ -1129,6 +1131,45 @@ trackingBtns.forEach(btn => {
         }
       });
     });
+
+    // Add event listeners to delete buttons in the staff dashboard tables
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      if (!btn) return;
+      btn.addEventListener("click", function() {
+        const itemId = this.getAttribute("data-id");
+        const itemType = this.getAttribute("data-type");
+        
+        if (confirm("Are you sure you want to delete this item?")) {
+          let collection;
+          if (itemType === "request") {
+            collection = requests;
+          } else if (itemType === "complaint") {
+            collection = complaints;
+          } else if (itemType === "others") {
+            collection = otherServices;
+          }
+          
+          const index = collection.findIndex(i => i.id === itemId);
+          if (index !== -1) {
+            collection.splice(index, 1);
+            localStorage.setItem(`${itemType === 'others' ? 'otherServices' : itemType + 's'}`, JSON.stringify(collection));
+            
+            // Update the appropriate collection variable
+            if (itemType === "request") {
+              requests = collection;
+            } else if (itemType === "complaint") {
+              complaints = collection;
+            } else if (itemType === "others") {
+              otherServices = collection;
+            }
+            
+            // Reload the staff dashboard
+            loadStaffDashboard();
+            alert("Item deleted successfully");
+          }
+        }
+      });
+    });
   }
 
   // Load admin dashboard
@@ -1306,45 +1347,6 @@ trackingBtns.forEach(btn => {
         const itemId = this.getAttribute("data-id");
         const itemType = this.getAttribute("data-type");
         showDetailsModal(itemId, itemType);
-      });
-    });
-
-    // Add event listeners to delete buttons
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-      if (!btn) return;
-      btn.addEventListener("click", function() {
-        const itemId = this.getAttribute("data-id");
-        const itemType = this.getAttribute("data-type");
-        
-        if (confirm("Are you sure you want to delete this item?")) {
-          let collection;
-          if (itemType === "request") {
-            collection = requests;
-          } else if (itemType === "complaint") {
-            collection = complaints;
-          } else if (itemType === "others") {
-            collection = otherServices;
-          }
-          
-          const index = collection.findIndex(i => i.id === itemId);
-          if (index !== -1) {
-            collection.splice(index, 1);
-            localStorage.setItem(`${itemType === 'others' ? 'otherServices' : itemType + 's'}`, JSON.stringify(collection));
-            
-            // Update the appropriate collection variable
-            if (itemType === "request") {
-              requests = collection;
-            } else if (itemType === "complaint") {
-              complaints = collection;
-            } else if (itemType === "others") {
-              otherServices = collection;
-            }
-            
-            // Reload the staff dashboard
-            loadStaffDashboard();
-            alert("Item deleted successfully");
-          }
-        }
       });
     });
   }
