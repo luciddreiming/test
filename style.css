@@ -1,3 +1,15 @@
+@keyframes service-bg-change {
+  0% {
+    background-image: url(images/Longos.jpg);
+  }
+  50% {
+    background-image: url(images/Longos2.jpg);
+  }
+  100% {
+    background-image: url(images/Longos3.jpg);
+  }
+}
+
 /* Import font */
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 
@@ -123,6 +135,7 @@ body {
   font-family: "Roboto", sans-serif;
   position: relative;
   min-height: 300px;
+  animation: service-bg-change 20s infinite ease-in-out;
 }
 
 .left-section::before {
@@ -214,7 +227,7 @@ body {
 }
 
 .header h1 {
-  color: #ffffff;
+  color: #000000; 
   margin-bottom: 10px;
   text-align: center;
   font-size: 1.8rem;
@@ -445,7 +458,7 @@ textarea {
 .toggle-password {
   position: absolute;
   right: 10px;
-  top: 50%;
+  top: 60%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #000000;
@@ -504,7 +517,7 @@ textarea {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 15px;
 }
-
+.admin-status-board
 /* Tables */
 .table-container {
   overflow-x: auto;
@@ -520,17 +533,22 @@ textarea {
   border-collapse: collapse;
   margin: 0;
   font-size: 0.85em;
-  min-width: 600px;
 }
 
 .tracking-table th,
 .submission-table th {
   background-color: #b740fa;
   color: #ffffff;
-  padding: 10px 12px;
+  padding: 10px 25px;
   text-align: left;
   border-bottom: 2px solid #ffd524;
   font-size: 0.9em;
+}
+.tracking-table th,
+.tracking-table td,
+.submission-table th,
+.submission-table td {
+  white-space: nowrap;
 }
 
 .tracking-table td,
@@ -552,7 +570,7 @@ textarea {
   background-color: #1f2833;
 }
 
-/* Action buttons */
+/* Action buttons with icons */
 .action-btn {
   padding: 5px 8px;
   border: none;
@@ -561,10 +579,19 @@ textarea {
   font-size: 0.8rem;
   margin-right: 3px;
   transition: opacity 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .action-btn:hover {
   opacity: 0.8;
+}
+
+.action-icon {
+  width: 16px;
+  height: 16px;
 }
 
 /* Status Colors */
@@ -720,6 +747,11 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 10s ease-in-out;
+}
+
+.service-options .box .imgBx:hover img {
+  transform: scale(1.2);
 }
 
 .service-options .box .content {
