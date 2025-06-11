@@ -175,11 +175,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show role-specific instructions
     if (userType === "staff") {
-      alert('Account created successfully! As staff, you will need to verify with "brgystff" after login.');
+      alert('Account created successfully! As an staff, you will need to verify using the unique staff password provided by the developer after logging in.');
     } else if (userType === "admin") {
-      alert('Account created successfully! As admin, you will need to verify with "admin" after login.');
+      alert('Account created successfully! As an admin, you will need to verify using the unique admin password provided by the developer after logging in.');
     } else {
-      alert("Account created successfully!");
+      alert("Account created successfully! Maraming salamat po!");
     }
 
     // Clear form and show login
@@ -658,7 +658,6 @@ trackingBtns.forEach(btn => {
         </div>
       </div>
     `;
-    
     modal.innerHTML = modalContent;
     document.body.appendChild(modal);
     
@@ -745,46 +744,140 @@ trackingBtns.forEach(btn => {
     return details;
   }
 
-  // Print item details
+  // Print item details with the new template
   function printItemDetails(item, itemType) {
     const printWindow = window.open('', '_blank');
+    const currentDate = new Date().toLocaleDateString();
+    
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
-        <title>${itemType === 'request' ? 'Request' : 
-                 itemType === 'complaint' ? 'Complaint' : 'Other Service'} Details #${item.id}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h1 { color: #166088; }
-          .item-info { margin-bottom: 20px; }
-          .status-badge { 
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.9em;
-            font-weight: bold;
-          }
-          .status-pending { background-color: #f39c12; color: black; }
-          .status-received { background-color: #17a2b8; color: white; }
-          .status-processing { background-color: #3498db; color: white; }
-          .status-completed { background-color: #2ecc71; color: white; }
-        </style>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Barangay Management System</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background-color: white;
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+              }
+              .container {
+                  text-align: center;
+                  margin-bottom: 20px;
+              }
+              .header-flex {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 20px;
+                  flex-wrap: wrap;
+              }
+              .title {
+                  text-align: center;
+              }
+              h1 {
+                  font-size: 2em;
+                  margin: 0;
+              }
+              h2 {
+                  font-size: 1.2em;
+                  margin: 5px 0 0;
+              }
+              table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  background-color: white;
+                  border: 1px solid #ccc;
+                  margin: 20px 0;
+              }
+              th {
+                  background-color: #9c27b0 !important;
+                  color: white !important;
+                  padding: 10px;
+                  -webkit-print-color-adjust: exact;
+              }
+              td {
+                  border: 1px solid #ccc;
+                  padding: 10px;
+                  text-align: center;
+              }
+              .status-badge {
+                  padding: 3px 8px;
+                  border-radius: 3px;
+                  font-weight: bold;
+                  display: inline-block;
+              }
+              .status-pending { background-color: #CD3531 !important; color: black !important; -webkit-print-color-adjust: exact; }
+              .status-received { background-color: #17a2b8 !important; color: white !important; -webkit-print-color-adjust: exact; }
+              .status-processing { background-color: #FFD524 !important; color: white !important; -webkit-print-color-adjust: exact; }
+              .status-completed { background-color: #026F00 !important; color: white !important; -webkit-print-color-adjust: exact; }
+              .footer {
+                  margin-top: 20px;
+                  text-align: right;
+                  font-style: italic;
+                  color: #666;
+              }
+              @media print {
+                  body {
+                      background-color: white !important;
+                  }
+                  th {
+                      background-color: #b740fa !important;
+                      color: white !important;
+                  }
+                  .status-pending, .status-received, .status-processing, .status-completed {
+                      -webkit-print-color-adjust: exact !important;
+                      print-color-adjust: exact !important;
+                  }
+              }
+          </style>
       </head>
       <body>
-        <h1>${itemType === 'request' ? 'Request' : 
-              itemType === 'complaint' ? 'Complaint' : 'Other Service'} Details #${item.id}</h1>
-        <div class="item-info">
-          <p><strong>Status:</strong> <span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></p>
-          <p><strong>Date Submitted:</strong> ${new Date(item.date).toLocaleDateString()}</p>
-          ${getItemSpecificDetails(item, itemType)}
-        </div>
-        <script>
-          setTimeout(function() {
-            window.print();
-            window.close();
-          }, 500);
-        </script>
+          <div class="container">
+              <div class="header-flex">
+                  <img src="images/Logo.png" alt="Barangay Longos Logo" class="logo" width="50" height="50">
+                  <div class="title">
+                      <h1>Barangay Management System</h1>
+                      <h2>Resident ${itemType === 'request' ? 'Request' : 
+                                  itemType === 'complaint' ? 'Complaint' : 'Service'} Details</h2>
+                  </div>
+                  <img src="images/malabon.png" alt="Barangay Longos Logo" class="logo" width="50" height="50">
+              </div>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Status</th>
+                      <th>Reference ID</th>
+                      <th>Resident Name</th>
+                      <th>Address</th>
+                      <th>Contact Number</th>
+                      <th>Service Type</th>
+                      <th>Date Submitted</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
+                      <td>${item.id}</td>
+                      <td>${item.firstName} ${item.lastName}</td>
+                      <td>${item.address || 'N/A'}</td>
+                      <td>${item.contactNumber || 'N/A'}</td>
+                      <td>${item.type || item.serviceType}</td>
+                      <td>${new Date(item.date).toLocaleDateString()}</td>
+                  </tr>
+              </tbody>
+          </table>
+          <script>
+              setTimeout(function() {
+                  window.print();
+                  window.close();
+              }, 500);
+          </script>
       </body>
       </html>
     `);
